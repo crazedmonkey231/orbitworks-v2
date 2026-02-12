@@ -162,10 +162,12 @@ export interface Entity {
   setUserData(userData: UserData): void;
   setName(name: string): void;
   setTransform(transform: Transform): void;
+  setPhysicsBodyData(physicsBodyData?: PhysicsBodyData): void;
 
   // Getters
   getGameScene(): ThreeSceneBase;
   getObject3D(): THREE.Object3D;
+  getAsMesh(): THREE.Mesh | undefined;
   getEntityType(): string;
   getAlive(): boolean;
   getTags(): Set<string>;

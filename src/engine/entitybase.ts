@@ -70,18 +70,6 @@ export abstract class EntityBase implements Entity {
   setAlive(alive: boolean): void {
     this.alive = alive;
     this.object3D.visible = alive;
-    const gameScene = this.getGameScene();
-    if (gameScene) {
-      if (alive) {
-        if (!this.getPhysicsBodyData()) {
-          gameScene.addPhysicsObject(this);
-        }
-      } else {
-        if (this.getPhysicsBodyData()) {
-          gameScene.removePhysicsObject(this);
-        }
-      }
-    }
   }
 
   setTags(tags: string[]): void {
@@ -116,6 +104,16 @@ export abstract class EntityBase implements Entity {
     this.object3D.scale.copy(transform.scale);
   }
 
+  setPhysicsBodyData(physicsBodyData?: PhysicsBodyData): void {
+    if (!physicsBodyData) {
+      if (this.userData.physics) {
+        delete this.userData.physics;
+      }
+      return;
+    }
+    this.userData.physics = physicsBodyData;
+  }
+
   // Getters
 
   getGameScene(): ThreeSceneBase {
@@ -124,6 +122,10 @@ export abstract class EntityBase implements Entity {
 
   getObject3D(): THREE.Object3D {
     return this.object3D;
+  }
+
+  getAsMesh(): THREE.Mesh | undefined {
+    return this.object3D as THREE.Mesh;
   }
 
   getEntityType(): string {
@@ -155,7 +157,7 @@ export abstract class EntityBase implements Entity {
   }
 
   getPhysicsBodyData(): PhysicsBodyData | undefined {
-    return this.userData.physicsBodyData;
+    return this.userData.physics;
   }
 
   getMaterialData(): MaterialData | undefined {

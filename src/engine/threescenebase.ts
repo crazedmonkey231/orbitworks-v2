@@ -452,13 +452,11 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
   }
 
   addPhysicsObject(entity: Entity): void {
-    const mesh = entity.getObject3D() as THREE.Mesh;
-    this.physics.addMesh(mesh, entity.getPhysicsData());
+    this.physics.addEntity(entity);
   }
 
   removePhysicsObject(entity: Entity): void {
-    const mesh = entity.getObject3D() as THREE.Mesh;
-    this.physics.removeMesh(mesh);
+    this.physics.removeEntity(entity);
   }
 
   addImpulse(
@@ -467,8 +465,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
     strength: number,
     index?: number,
   ): void {
-    const mesh = entity.getObject3D() as THREE.Mesh;
-    this.physics.addImpulse(mesh, impulse, strength, index);
+    this.physics.addImpulse(entity, impulse, strength, index);
   }
 
   addImpulseAtPoint(

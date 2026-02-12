@@ -70,8 +70,7 @@ function getShape(geometry: THREE.BufferGeometry): RAPIER.ColliderDesc | null {
 
 /**
  * A wrapper class for the Rapier physics engine.
- * Physics may not be immediately available due to asynchronous loading, so objects will be queued until the engine is ready.
- * This class manages the physics world and provides methods to add/remove physics-enabled meshes.
+ * This class manages the physics world and provides methods to add/remove physics-enabled entities.
  */
 export class Physics {
   private threeScene: ThreeSceneBase;
@@ -163,17 +162,16 @@ export class Physics {
   }
 
   addEntity(entity: Entity) {
-    const mesh = entity.getObject3D() as THREE.Mesh;
-    if (mesh) {
-      this.addMesh(mesh, entity.getPhysicsData());
+    const mesh = entity.getAsMesh();
+    if (!mesh) {
+      return;
     }
-  }
-
-  addMesh(mesh: THREE.Mesh, options?: PhysicsData) {
     const shape = getShape(mesh.geometry);
     if (!shape) {
       return;
     }
+
+    const options = entity.getPhysicsData();
     const mass = options?.mass ?? 1;
     const friction = options?.friction ?? 0.5;
     const density = options?.density ?? 1;
@@ -197,13 +195,7 @@ export class Physics {
         shape,
       ));
     }
-    const newBodyData = { body, collider } as PhysicsBodyData;
-
-    if (!mesh.userData.physics) {
-      mesh.userData.physics = {} as PhysicsBodyData;
-    }
-
-    mesh.userData.physics = newBodyData;
+    entity.setPhysicsBodyData({ body, collider } as PhysicsBodyData);
   }
 
   private removeBody(body: RAPIER.RigidBody | RAPIER.RigidBody[]) {
@@ -224,22 +216,11 @@ export class Physics {
   }
 
   removeEntity(entity: Entity) {
-    const mesh = entity.getObject3D() as THREE.Mesh;
-    if (mesh) {
-      this.removeMesh(mesh);
-    }
-  }
-
-  removeMesh(mesh: THREE.Mesh) {
-    const physicsData = mesh.userData.physics as PhysicsBodyData | undefined;
-    if (physicsData) {
-      if (physicsData.body) {
-        this.removeBody(physicsData.body);
-      }
-      if (physicsData.collider) {
-        this.removeCollider(physicsData.collider);
-      }
-      delete mesh.userData.physics;
+    const physics = entity.getPhysicsBodyData();
+    if (physics) {
+      this.removeBody(physics.body);
+      this.removeCollider(physics.collider);
+      entity.setPhysicsBodyData(undefined);
     }
   }
 
@@ -263,13 +244,8 @@ export class Physics {
     }
   }
 
-  setEntityTransform(entity: Entity, transform: Transform) {
-    const mesh = entity.getObject3D() as THREE.Mesh;
-    this.setMeshTransform(mesh, transform);
-  }
-
-  setMeshTransform(mesh: THREE.Mesh, transform: Transform, index?: number) {
-    const physicsData = mesh.userData.physics as PhysicsBodyData | undefined;
+  setEntityTransform(entity: Entity, transform: Transform, index?: number) {
+    const physicsData = entity.getPhysicsBodyData();
     if (physicsData?.body) {
       const position = transform.position || new THREE.Vector3();
       const rotation = transform.rotation || new THREE.Euler();
@@ -286,8 +262,8 @@ export class Physics {
     }
   }
 
-  setMeshVelocity(mesh: THREE.Mesh, velocity: THREE.Vector3, index?: number) {
-    const physicsData = mesh.userData.physics as PhysicsBodyData | undefined;
+  setEntityVelocity(entity: Entity, velocity: THREE.Vector3, index?: number) {
+    const physicsData = entity.getPhysicsBodyData();
     if (physicsData?.body) {
       if (Array.isArray(physicsData.body)) {
         if (index !== undefined && physicsData.body[index]) {
@@ -306,12 +282,12 @@ export class Physics {
   }
 
   addImpulse(
-    mesh: THREE.Mesh,
+    entity: Entity,
     impulse: THREE.Vector3,
     strength: number = 1,
     index?: number,
   ) {
-    const physicsData = mesh.userData.physics as PhysicsBodyData | undefined;
+    const physicsData = entity.getPhysicsBodyData();
     if (physicsData?.body) {
       if (Array.isArray(physicsData.body)) {
         if (index !== undefined && physicsData.body[index]) {
@@ -368,7 +344,7 @@ export class Physics {
   }
 
   addHeightfield(
-    mesh: THREE.Mesh,
+    entity: Entity,
     width: number,
     depth: number,
     heights: Float32Array,
@@ -380,12 +356,17 @@ export class Physics {
       heights,
       scale,
     );
+    const mesh = entity.getAsMesh();
+    if (!mesh) {
+      console.error("Physics.addHeightfield: Entity does not have a mesh.");
+      return;
+    }
     const bodyDesc = RAPIER.RigidBodyDesc.fixed()
       .setTranslation(mesh.position.x, mesh.position.y, mesh.position.z)
       .setRotation(mesh.quaternion);
     const body = this.world.createRigidBody(bodyDesc);
     const collider = this.world.createCollider(colliderDesc, body);
-    mesh.userData.physics = { body, collider } as PhysicsBodyData;
+    entity.setPhysicsBodyData({ body, collider } as PhysicsBodyData);
   }
 
   /** Update the physics helper */
@@ -399,15 +380,8 @@ export class Physics {
 
   syncEntity(entity: any) {
     if (!this.enabled) return;
-    const mesh = entity.getObject3D() as THREE.Mesh;
-    this.syncMesh(mesh);
-  }
-
-  syncMesh(mesh: THREE.Mesh) {
-    if (!this.enabled) return;
-    const physicsBodyData = mesh.userData.physics as
-      | PhysicsBodyData
-      | undefined;
+    const physicsBodyData = entity.getPhysicsBodyData();
+    const mesh = entity.getAsMesh();
     if (physicsBodyData?.body) {
       if (Array.isArray(physicsBodyData.body)) {
         if (mesh instanceof THREE.InstancedMesh) {
@@ -456,31 +430,5 @@ export class Physics {
 
   loadState(state: PhysicsState) {
     this.setEnabled(state.enabled);
-  }
-
-  private debugSphere(
-    size: number,
-    position: THREE.Vector3,
-    resolution: number = 64,
-    color: number = 0xff0000,
-    wireframe: boolean = true,
-    duration: number = 500,
-  ) {
-    //   if (this.helper) {
-    //     const sphere = new THREE.SphereGeometry(size, resolution, resolution);
-    //     const mat = new THREE.MeshBasicMaterial({
-    //       color: color,
-    //       wireframe: wireframe,
-    //       transparent: true,
-    //       opacity: 0.5
-    //     });
-    //     const mesh = new THREE.Mesh(sphere, mat);
-    //     mesh.position.copy(position);
-    //     this.helper.add(mesh);
-    //     setTimeout(() => {
-    //       this.helper?.remove(mesh);
-    //       disposeObject3D(mesh);
-    //     }, duration);
-    //   }
   }
 }
