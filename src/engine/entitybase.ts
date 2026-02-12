@@ -69,8 +69,19 @@ export abstract class EntityBase implements Entity {
 
   setAlive(alive: boolean): void {
     this.alive = alive;
-    // Hide object if not alive, but keep it in the scene for potential reuse
     this.object3D.visible = alive;
+    const gameScene = this.getGameScene();
+    if (gameScene) {
+      if (alive) {
+        if (!this.getPhysicsBodyData()) {
+          gameScene.addPhysicsObject(this);
+        }
+      } else {
+        if (this.getPhysicsBodyData()) {
+          gameScene.removePhysicsObject(this);
+        }
+      }
+    }
   }
 
   setTags(tags: string[]): void {

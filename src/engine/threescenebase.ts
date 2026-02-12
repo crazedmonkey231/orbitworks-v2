@@ -233,12 +233,12 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
   update(args: UpdateArgs): void {
     if (!this.paused) {
       this.preUpdate?.(args);
-      this.physics?.update(args);
+      this.physics.update(args);
       this.weather.update(args);
       this.collision.update(args);
       this.audio.update(args);
       for (const entity of this.entities) {
-        this.physics?.syncEntity(entity);
+        this.physics.syncEntity(entity);
         entity.update(args);
         if (entity.getObject3D().position.y < this.killY) {
           this.removeEntity(entity);
