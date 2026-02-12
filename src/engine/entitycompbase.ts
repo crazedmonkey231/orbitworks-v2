@@ -1,0 +1,88 @@
+import { EntityComponent, Entity, EntityComponentState, UpdateArgs } from "./core";
+import { ThreeSceneBase } from "./threescenebase";
+
+/** 
+ * Base class for entity components, sets up the basic loading state and attachment of the component 
+ */
+export abstract class EntityComponentBase implements EntityComponent {
+  private name: string = "UnnamedComponent";
+  private compType: string = "Base";
+  private entity: Entity | undefined;
+
+  constructor(entity: Entity, state: EntityComponentState) {
+    this.setName(state.name);
+    this.compType = state.compType;
+    this.setEntity(entity);
+  }
+
+  // Setters for core properties
+
+  setName(name: string): void {
+    this.name = name;
+  }
+
+  setEntity(entity: Entity): void {
+    this.entity = entity;
+  }
+
+  // Getters
+
+  getName(): string {
+    return this.name;
+  }
+
+  getEntity(): Entity | undefined {
+    return this.entity;
+  }
+
+  getThreeScene(): ThreeSceneBase {
+    const entity = this.getEntity();
+    if (!entity) {
+      throw new Error("EntityComponentBase: No entity attached to component.");
+    }
+    return entity.getGameScene();
+  }
+
+  // Helpers
+
+  isNameEqual(name: string): boolean {
+    return this.name === name;
+  }
+
+  // Lifecycle methods
+
+  /** onUpdate for custom update logic */
+  abstract onUpdate(args: UpdateArgs): void;
+
+  update(args: UpdateArgs): void { 
+    this.onUpdate(args);
+  }
+
+  /** onDispose for custom cleanup */
+  abstract onDispose(): void;
+
+  dispose(): void {
+    this.onDispose();
+    this.entity = undefined;
+  }
+
+  removeFromEntity(): void {
+    if (this.entity) {
+      this.entity.removeComponent(this.name);
+    }
+  }
+
+  // State management for saving/loading
+
+  saveState(): EntityComponentState {
+    return {
+      name: this.name,
+      compType: this.compType,
+      // Add more state properties as needed
+    };
+  }
+  
+  loadState(state: EntityComponentState): void {
+    // Load state properties as needed
+  }
+}
