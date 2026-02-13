@@ -229,6 +229,7 @@ export interface CameraState {
 export interface PhysicsState {
   enabled: boolean;
   helper: boolean;
+  gravity?: XYZ;
 }
 
 /** Weather state interface for saving/loading */

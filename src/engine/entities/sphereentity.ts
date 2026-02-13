@@ -14,10 +14,10 @@ export class SphereEntity extends EntityBase {
     const radius = entityState.userData.radius * transform.scale.x;
     entityState.userData.radius = radius;
     transform.scale = new THREE.Vector3(1, 1, 1);
-    const resolution = entityState.userData.resolution || 32;
+    const segments = entityState.userData.segments || 32;
     const materialData = entityState.userData.material || {};
     materialData.color = materialData.color ?? 0x00ff00;
-    const geometry = new THREE.SphereGeometry(radius, resolution, resolution);
+    const geometry = new THREE.SphereGeometry(radius, segments, segments);
     const material = new THREE.MeshStandardMaterial(materialData);
     const mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = true;

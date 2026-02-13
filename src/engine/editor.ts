@@ -507,7 +507,8 @@ export class Editor {
       // If Enter is pressed, blur the input to trigger any change events
       if (event.key === "Enter") {
         inputElement.blur();
-        this.reloadScene();
+        this.reloadScene(true);
+        this.refreshPropertiesPanel();
       }
     });
 
@@ -605,13 +606,48 @@ export class Editor {
         },
       },
       {
+        name: "Box Data",
+        value: `${this.selected.state.userData.width?.toFixed(
+          2,
+        )}, ${this.selected.state.userData.height?.toFixed(
+          2,
+        )}, ${this.selected.state.userData.depth?.toFixed(2)}`,
+        position: { x: 5, y: 180 },
+        onChange: (newValue) => {
+          const pos = newValue
+            .split(",")
+            .map((coord: string) => parseFloat(coord.trim()));
+          if (pos.length === 3) {
+            this.selected!.state.userData.width = pos[0];
+            this.selected!.state.userData.height = pos[1];
+            this.selected!.state.userData.depth = pos[2];
+          }
+        },
+      },
+      {
+        name: "Sphere Data",
+        value: `${this.selected.state.userData.radius?.toFixed(
+          2,
+        )}, ${this.selected.state.userData.segments?.toFixed(2)}`,
+        position: { x: 5, y: 210 },
+        onChange: (newValue) => {
+          const pos = newValue
+            .split(",")
+            .map((coord: string) => parseFloat(coord.trim()));
+          if (pos.length === 2) {
+            this.selected!.state.userData.radius = pos[0];
+            this.selected!.state.userData.segments = pos[1];
+          }
+        },
+      },
+      {
         name: "Position",
         value: `${this.selected.state.userData.transform!.position.x.toFixed(
           2,
         )}, ${this.selected.state.userData.transform!.position.y.toFixed(
           2,
         )}, ${this.selected.state.userData.transform!.position.z.toFixed(2)}`,
-        position: { x: 5, y: 180 },
+        position: { x: 5, y: 240 },
         onChange: (newValue) => {
           const pos = newValue
             .split(",")
@@ -631,7 +667,7 @@ export class Editor {
         ).toFixed(2)}, ${THREE.MathUtils.radToDeg(
           this.selected.state.userData.transform!.rotation.z,
         ).toFixed(2)}`,
-        position: { x: 5, y: 210 },
+        position: { x: 5, y: 270 },
         onChange: (newValue) => {
           const rot = newValue
             .split(",")
@@ -654,7 +690,7 @@ export class Editor {
         )}, ${this.selected.state.userData.transform!.scale.y.toFixed(
           2,
         )}, ${this.selected.state.userData.transform!.scale.z.toFixed(2)}`,
-        position: { x: 5, y: 240 },
+        position: { x: 5, y: 300 },
         onChange: (newValue) => {
           const scale = newValue
             .split(",")
@@ -672,7 +708,7 @@ export class Editor {
         name: "Mass",
         value:
           this.selected.state.userData.physicsData?.mass?.toString() || "0",
-        position: { x: 5, y: 270 },
+        position: { x: 5, y: 330 },
         onChange: (newValue) => {
           const mass = parseFloat(newValue);
           if (!isNaN(mass)) {
@@ -690,7 +726,7 @@ export class Editor {
         name: "Friction",
         value:
           this.selected.state.userData.physicsData?.friction?.toString() || "0",
-        position: { x: 5, y: 300 },
+        position: { x: 5, y: 360 },
         onChange: (newValue) => {
           const friction = parseFloat(newValue);
           if (!isNaN(friction)) {
@@ -708,7 +744,7 @@ export class Editor {
         name: "Density",
         value:
           this.selected.state.userData.physicsData?.density?.toString() || "0",
-        position: { x: 5, y: 330 },
+        position: { x: 5, y: 390 },
         onChange: (newValue) => {
           const density = parseFloat(newValue);
           if (!isNaN(density)) {
@@ -727,7 +763,7 @@ export class Editor {
         value:
           this.selected.state.userData.physicsData?.restitution?.toString() ||
           "0",
-        position: { x: 5, y: 360 },
+        position: { x: 5, y: 420 },
         onChange: (newValue) => {
           const restitution = parseFloat(newValue);
           if (!isNaN(restitution)) {

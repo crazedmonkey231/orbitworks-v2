@@ -1,10 +1,8 @@
 import * as THREE from "three";
 import * as RAPIER from "@dimforge/rapier3d";
-// import { RapierPhysics, RapierPhysicsObject } from "three/addons/physics/RapierPhysics.js";
-// import { RapierHelper } from "three/addons/helpers/RapierHelper.js";
+import { RapierHelper } from "three/addons/helpers/RapierHelper.js";
 import {
   Entity,
-  PhysicsData,
   PhysicsState,
   Transform,
   UpdateArgs,
@@ -76,42 +74,68 @@ export class Physics {
   private threeScene: ThreeSceneBase;
   private world: RAPIER.World;
   private eventQueue: RAPIER.EventQueue;
+  private helper: RapierHelper | null = null;
 
   private _vector = new THREE.Vector3();
   private _quaternion = new THREE.Quaternion();
   private _matrix = new THREE.Matrix4();
   private _scale = new THREE.Vector3(1, 1, 1);
 
-  private enabled: boolean = false;
-  private gravity: XYZ = { x: 0, y: -9.81, z: 0 };
+  private physicsState: PhysicsState;
 
   constructor(threeScene: ThreeSceneBase, physicsState: PhysicsState) {
-    this.enabled = physicsState.enabled;
+    this.physicsState = physicsState;
     this.threeScene = threeScene;
-    this.world = new RAPIER.World(this.gravity);
+    this.world = new RAPIER.World(physicsState.gravity || { x: 0, y: -9.81, z: 0 });
     this.eventQueue = new RAPIER.EventQueue(true);
-    console.log("Physics system initialized:", this.enabled);
+    this.createHelper(this.physicsState);
+    console.log("Physics system initialized:", this.physicsState.enabled);
   }
 
-  setEnabled(enabled: boolean) {
-    this.enabled = enabled;
+  createHelper(physicsState: PhysicsState) {
+    if (physicsState.helper){
+      if (this.helper) {
+        return;
+      }
+      this.helper = new RapierHelper(this.world as any);
+      if (physicsState.helper) {
+        this.threeScene.add(this.helper);
+      }
+    } else {
+      if (this.helper) {
+        this.threeScene.remove(this.helper);
+        this.helper = null;
+      }
+    }
+  }
+
+  setEnabled(enabled: boolean, helperEnabled?: boolean) {
+    this.physicsState.enabled = enabled;
     for (const entity of this.threeScene.getEntities()) {
       this.removeEntity(entity);
+    }
+    for (const body of this.world.bodies.getAll()) {
+      this.world.removeRigidBody(body);
     }
     if (enabled) {
       for (const entity of this.threeScene.getEntities()) {
         this.addEntity(entity);
       }
     }
-    console.log(`Physics system ${enabled ? "enabled" : "disabled"}.`);
+    if (helperEnabled !== undefined) {
+      this.physicsState.helper = helperEnabled;
+    } else {
+      this.physicsState.helper = enabled;
+    }
+    this.createHelper(this.physicsState);
   }
 
   getEnabled() {
-    return this.enabled;
+    return this.physicsState.enabled;
   }
 
   toggleEnabled(override?: boolean) {
-    this.setEnabled(override !== undefined ? override : !this.enabled);
+    this.setEnabled(override !== undefined ? override : !this.physicsState.enabled);
   }
 
   private createBody(
@@ -199,6 +223,7 @@ export class Physics {
   }
 
   private removeBody(body: RAPIER.RigidBody | RAPIER.RigidBody[]) {
+    if (!body) return;
     if (Array.isArray(body)) {
       body.forEach((b) => this.world.removeRigidBody(b));
     } else {
@@ -207,6 +232,7 @@ export class Physics {
   }
 
   private removeCollider(collider: RAPIER.Collider | RAPIER.Collider[]) {
+    if (!collider) return;
     const wakeUp = true;
     if (Array.isArray(collider)) {
       collider.forEach((c) => this.world.removeCollider(c, wakeUp));
@@ -218,8 +244,12 @@ export class Physics {
   removeEntity(entity: Entity) {
     const physics = entity.getPhysicsBodyData();
     if (physics) {
-      this.removeBody(physics.body);
-      this.removeCollider(physics.collider);
+      if (physics.body) {
+        this.removeBody(physics.body);
+      }
+      if (physics.collider) {
+        this.removeCollider(physics.collider);
+      }
       entity.setPhysicsBodyData(undefined);
     }
   }
@@ -314,7 +344,6 @@ export class Physics {
   }
 
   addImpulseAtPoint(
-    impulse: THREE.Vector3,
     point: THREE.Vector3,
     strength: number = 1,
     range: number = 5,
@@ -371,17 +400,21 @@ export class Physics {
 
   /** Update the physics helper */
   update(args: UpdateArgs) {
-    if (!this.enabled) return;
+    if (!this.physicsState.enabled) return;
+    if (this.helper) {
+      this.helper.update();
+    }
     this.world.step(this.eventQueue);
     this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
       // Handle collision events here if needed
     });
   }
 
-  syncEntity(entity: any) {
-    if (!this.enabled) return;
-    const physicsBodyData = entity.getPhysicsBodyData();
+  syncEntity(entity: Entity) {
+    if (!this.physicsState.enabled) return;
     const mesh = entity.getAsMesh();
+    if (!mesh) return;
+    const physicsBodyData = entity.getPhysicsBodyData();
     if (physicsBodyData?.body) {
       if (Array.isArray(physicsBodyData.body)) {
         if (mesh instanceof THREE.InstancedMesh) {
@@ -416,19 +449,21 @@ export class Physics {
 
   /** Dispose of physics resources */
   dispose() {
-    this.enabled = false;
+    this.physicsState.enabled = false;
     this.world.free();
   }
 
   /** Save the state of the physics system */
   saveState(): PhysicsState {
     return {
-      enabled: this.enabled,
-      helper: false,
+      enabled: this.physicsState.enabled,
+      helper: this.physicsState.helper,
+      gravity: this.physicsState.gravity,
     };
   }
 
   loadState(state: PhysicsState) {
-    this.setEnabled(state.enabled);
+    this.setEnabled(state.enabled, state.helper);
+    this.physicsState = state;
   }
 }
