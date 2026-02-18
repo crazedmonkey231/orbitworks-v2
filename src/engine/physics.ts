@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import * as RAPIER from "@dimforge/rapier3d";
 import { RapierHelper } from "three/addons/helpers/RapierHelper.js";
-import { Entity, PhysicsState, Transform, UpdateArgs } from "./types";
+import { PhysicsState, Transform, UpdateArgs } from "./types";
 import { ThreeSceneBase } from "./threescenebase";
+import { Entity } from "./entity";
 
 // Re-export RAPIER types for convenience and variables for the physics system
 
@@ -401,8 +402,7 @@ export class Physics {
     const physicsData = entity.getPhysicsBodyData();
     if (physicsData?.body) {
       const position = transform.position || new THREE.Vector3();
-      const rotation = transform.rotation || new THREE.Euler();
-      const quaternion = new THREE.Quaternion().setFromEuler(rotation);
+      const quaternion = transform.quaternion || new THREE.Quaternion();
       if (Array.isArray(physicsData.body)) {
         if (index !== undefined && physicsData.body[index]) {
           this.setTranslation(physicsData.body[index], position);

@@ -297,7 +297,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
         far: this.camera.far,
         transform: {
           position: this.camera.position.clone(),
-          rotation: this.camera.rotation.clone(),
+          quaternion: this.camera.quaternion.clone(),
           scale: this.camera.scale.clone(),
         },
       },
@@ -324,7 +324,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     this.camera.near = cameraState.near;
     this.camera.far = cameraState.far;
     this.camera.position.copy(cameraState.transform.position);
-    this.camera.rotation.copy(cameraState.transform.rotation);
+    this.camera.quaternion.copy(cameraState.transform.quaternion);
     this.camera.scale.copy(cameraState.transform.scale);
     this.camera.updateProjectionMatrix();
 

@@ -93,14 +93,8 @@ export abstract class EntityBase implements Entity {
   }
 
   setTransform(transform: Transform): void {
-    if (!transform) {
-      this.object3D.position.set(0, 0, 0);
-      this.object3D.rotation.set(0, 0, 0);
-      this.object3D.scale.set(1, 1, 1);
-      return;
-    }
     this.object3D.position.copy(transform.position);
-    this.object3D.rotation.copy(transform.rotation);
+    this.object3D.quaternion.copy(transform.quaternion);
     this.object3D.scale.copy(transform.scale);
   }
 
@@ -174,8 +168,24 @@ export abstract class EntityBase implements Entity {
   getTransform(): Transform {
     return {
       position: this.object3D.position.clone(),
-      rotation: this.object3D.rotation.clone(),
+      quaternion: this.object3D.quaternion.clone(),
       scale: this.object3D.scale.clone(),
+    };
+  }
+
+  getWorldTransform(): Transform {
+    const worldPosition = new THREE.Vector3();
+    const worldScale = new THREE.Vector3();
+    const worldQuaternion = new THREE.Quaternion();
+    this.object3D.updateMatrixWorld(true);
+    this.object3D.getWorldPosition(worldPosition);
+    this.object3D.getWorldQuaternion(worldQuaternion);
+    this.object3D.getWorldScale(worldScale);
+
+    return {
+      position: worldPosition,
+      quaternion: worldQuaternion,
+      scale: worldScale,
     };
   }
 

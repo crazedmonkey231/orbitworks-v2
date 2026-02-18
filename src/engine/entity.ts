@@ -43,6 +43,7 @@ export interface Entity {
   getPhysicsBodyData(): PhysicsBodyData;
   getMaterialData(): MaterialData;
   getTransform(): Transform;
+  getWorldTransform(): Transform;
   getColliderHandle(): number[];
 
   // Tag management

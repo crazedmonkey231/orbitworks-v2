@@ -692,11 +692,11 @@ export class Editor {
       {
         name: "Rotation",
         value: `${THREE.MathUtils.radToDeg(
-          this.selected.state.userData.transform!.rotation.x,
+          this.selected.state.userData.transform!.quaternion.x,
         ).toFixed(2)}, ${THREE.MathUtils.radToDeg(
-          this.selected.state.userData.transform!.rotation.y,
+          this.selected.state.userData.transform!.quaternion.y,
         ).toFixed(2)}, ${THREE.MathUtils.radToDeg(
-          this.selected.state.userData.transform!.rotation.z,
+          this.selected.state.userData.transform!.quaternion.z,
         ).toFixed(2)}`,
         position: { x: 5, y: 270 },
         onChange: (newValue) => {
@@ -706,10 +706,8 @@ export class Editor {
               THREE.MathUtils.degToRad(parseFloat(angle.trim())),
             );
           if (rot.length === 3) {
-            this.selected!.state.userData.transform!.rotation = new THREE.Euler(
-              rot[0],
-              rot[1],
-              rot[2],
+            this.selected!.state.userData.transform!.quaternion = new THREE.Quaternion().setFromEuler(
+              new THREE.Euler(rot[0], rot[1], rot[2]),
             );
           }
         },

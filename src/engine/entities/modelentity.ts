@@ -2,11 +2,11 @@ import { Object3D } from "three";
 import { EntityState, UpdateArgs } from "../types";
 import { EntityBase } from "../entitybase";
 import { ThreeSceneBase } from "../threescenebase";
-import { ModelRegistry } from "../modelregistry";
+import { getModel } from "../modelregistry";
 import { Entity } from "../entity";
 
 
-/** A basic entity with no special behavior */
+/** A basic model entity that uses a 3D model from the model registry */
 export class ModelEntity extends EntityBase {
   constructor(threeScene: ThreeSceneBase, state: EntityState) {
     super(threeScene, state);
@@ -17,7 +17,7 @@ export class ModelEntity extends EntityBase {
       console.warn(`ModelEntity ${entityState.name} is missing modelName in state. Using empty Object3D.`);
       return new Object3D();
     }
-    const model = ModelRegistry.getModel(entityState.userData.modelName);
+    const model = getModel(entityState.userData.modelName);
     if (model) {
       return model;
     }

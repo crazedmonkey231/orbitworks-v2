@@ -57,7 +57,7 @@ export interface XYZ {
 /** Transform interface */
 export interface Transform {
   position: THREE.Vector3;
-  rotation: THREE.Euler;
+  quaternion: THREE.Quaternion;
   scale: THREE.Vector3;
 }
 
