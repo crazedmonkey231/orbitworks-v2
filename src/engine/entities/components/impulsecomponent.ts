@@ -1,6 +1,7 @@
 import * as THREE from "three";
-import { Entity, EntityComponentState, UpdateArgs } from "../../core";
+import { EntityComponentState, UpdateArgs } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
+import { Entity } from "../../entity";
 
 /** A basic impulse component */
 export class ImpulseComponent extends EntityComponentBase {

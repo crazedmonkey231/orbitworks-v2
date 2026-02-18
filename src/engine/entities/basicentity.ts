@@ -1,7 +1,8 @@
 import { Object3D } from "three";
-import { Entity, EntityState, UpdateArgs } from "../core";
+import { EntityState, UpdateArgs } from "../types";
 import { EntityBase } from "../entitybase";
 import { ThreeSceneBase } from "../threescenebase";
+import { Entity } from "../entity";
 
 
 /** A basic entity with no special behavior */

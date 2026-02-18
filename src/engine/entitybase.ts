@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import { disposeObject3D } from "./utils.js";
 import {
-  Entity,
-  EntityComponent,
   EntityComponentState,
   EntityState,
   GameplayTag,
@@ -10,13 +8,13 @@ import {
   PhysicsData,
   Transform,
   UpdateArgs,
-  UpdateType,
-  UpdateTypes,
   UserData,
-} from "./core.js";
+} from "./types.js";
 import { ThreeSceneBase } from "./threescenebase.js";
 import { createComponentsFromStates } from "./entitycompfactory.js";
 import { PhysicsBodyData } from "./physics.js";
+import { Entity } from "./entity.js";
+import { EntityComponent } from "./entitycomp.js";
 
 /**
  * Abstract base class for entities.
@@ -116,10 +114,6 @@ export abstract class EntityBase implements Entity {
     this.userData.physics = physicsBodyData;
   }
 
-  setUpdateType(updateType: UpdateType): void {
-    this.userData.updateType = updateType;
-  }
-
   // Getters
 
   getThreeScene(): ThreeSceneBase {
@@ -195,10 +189,6 @@ export abstract class EntityBase implements Entity {
       }
     }
     return [];
-  }
-
-  getUpdateType(): UpdateType {
-    return this.userData.updateType || UpdateTypes.Normal;
   }
 
   // Tag management

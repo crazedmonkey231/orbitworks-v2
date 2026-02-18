@@ -1,7 +1,8 @@
 import * as THREE from "three";
-import { Entity, EntityComponentState, UpdateArgs } from "../../core";
+import { EntityComponentState, UpdateArgs } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
 import { CharacterController, BodyTypes, RigidBody } from "../../physics";
+import { Entity } from "../../entity";
 
 const keyMap: { [key: string]: Phaser.Input.Keyboard.Key | undefined } = {
   W: undefined,

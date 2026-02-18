@@ -1,13 +1,10 @@
-import { depth, texture, userData } from "three/tsl";
 import {
-  Entity,
   EntityComponentState,
   EntityState,
   GameplayTags,
   UpdateArgs,
-} from "../../core";
+} from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
-import { EntityFactory } from "../../entityfactory";
 import { Vector3 } from "three";
 import {
   Collider,
@@ -15,6 +12,8 @@ import {
   createCollisionGroups,
   setColliderGroups,
 } from "../../physics";
+import { createEntity } from "../../entityfactory";
+import { Entity } from "../../entity";
 
 /** A basic implementation of a spawner component */
 export class SpawnerComponent extends EntityComponentBase {
@@ -115,7 +114,7 @@ export class SpawnerComponent extends EntityComponentBase {
           },
         },
       };
-      const newEntity = EntityFactory.createEntity(scene, entityState);
+      const newEntity = createEntity(scene, entityState);
       scene.addEntity(newEntity, true);
       const collider = newEntity.getPhysicsBodyData().collider as Collider;
       if (collider) {

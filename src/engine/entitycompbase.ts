@@ -1,5 +1,7 @@
-import { EntityComponent, Entity, EntityComponentState, UpdateArgs } from "./core";
+import { EntityComponentState, UpdateArgs } from "./types";
 import { ThreeSceneBase } from "./threescenebase";
+import { EntityComponent } from "./entitycomp";
+import { Entity } from "./entity";
 
 /** 
  * Base class for entity components, sets up the basic loading state and attachment of the component 

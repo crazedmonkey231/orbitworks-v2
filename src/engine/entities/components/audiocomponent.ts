@@ -1,5 +1,6 @@
-import { Entity, EntityComponentState, UpdateArgs } from "../../core";
+import { EntityComponentState, UpdateArgs } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
+import { Entity } from "../../entity";
 
 /** 
  * A basic implementation of a 3D audio component

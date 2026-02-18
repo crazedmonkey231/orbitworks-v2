@@ -1,5 +1,6 @@
-import { Entity, EntityComponentState, UpdateArgs } from "../../core";
+import { EntityComponentState, UpdateArgs } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
+import { Entity } from "../../entity";
 
 /** A basic implementation of an entity component */
 export class HealthComponent extends EntityComponentBase {

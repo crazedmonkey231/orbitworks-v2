@@ -1,10 +1,6 @@
-import { GameScene } from "../../core";
 import { ThreeSceneBase } from "../../threescenebase";
 import { Demo3DScene } from "../3D/demo3Dscene";
-import { FileScene } from "../3D/filescene";
 import { Editor } from "../../editor";
-import { AudioComponent } from "../../entities/components/audiocomponent";
-import { createComponent } from "../../entitycompfactory";
 
 export class DemoPhaserScene extends Phaser.Scene {
   scene3D!: ThreeSceneBase;

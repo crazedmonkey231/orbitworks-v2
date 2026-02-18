@@ -1,20 +1,16 @@
 import * as THREE from "three";
 import {
-  Entity,
-  GameScene,
   UpdateArgs,
-  GameSceneState,
-  GameSceneOptions,
+  ThreeSceneState,
+  ThreeSceneOptions,
   Tween,
   GameplayTag,
   UserProfile,
   WebWorkerResponse,
   WebWorkerPayload,
-  ICollisionHandler,
+  CollisionCallback,
   XY,
-  UpdateTypes,
-} from "./core";
-import { EntityFactory } from "./entityfactory";
+} from "./types";
 import { renderer, resizeThree } from "./game";
 import { PostProcess } from "./postprocess";
 import { WeatherManager } from "./weather";
@@ -24,6 +20,9 @@ import { MultiplayerManager } from "./multiplayer";
 import { CharacterController, Physics, PhysicsCollisionData } from "./physics";
 import { WebWorkerHandle, WebWorkerManager } from "./webworker";
 import { LevelPath } from "./paths";
+import { createAddEntities } from "./entityfactory";
+import { ThreeScene } from "./threescene";
+import { Entity } from "./entity";
 
 /**
  * ThreeSceneBase is an abstract base class for game scenes that use Three.js for rendering.
@@ -40,7 +39,7 @@ import { LevelPath } from "./paths";
  *
  * Subclasses must implement the onUpdate and onDispose methods to define specific behavior and cleanup for each scene.
  */
-export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
+export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
   private paused: boolean = false;
   private killY: number;
   private phaserScene: Phaser.Scene;
@@ -56,7 +55,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
   private raycaster: THREE.Raycaster;
   private tmpVec2: THREE.Vector2 = new THREE.Vector2();
 
-  constructor(phaserScene: Phaser.Scene, options?: GameSceneOptions) {
+  constructor(phaserScene: Phaser.Scene, options?: ThreeSceneOptions) {
     super();
     this.phaserScene = phaserScene;
     this.killY = options?.killY ?? -10;
@@ -253,9 +252,6 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
       this.collision.update(args);
       this.audio.update(args);
       for (const entity of this.entities) {
-        if (entity.getUpdateType() !== UpdateTypes.Normal){
-          continue; // Skip entities that are not meant to be updated in the main loop
-        }
         this.physics.syncEntity(entity);
         if (entity.getObject3D().position.y < this.killY) {
           this.removeEntity(entity);
@@ -292,8 +288,8 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
 
   // Save/load management
 
-  saveSceneState(): GameSceneState {
-    const state: GameSceneState = {
+  saveSceneState(): ThreeSceneState {
+    const state: ThreeSceneState = {
       paused: this.paused,
       camera: {
         fov: this.camera.fov,
@@ -312,7 +308,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
     return state;
   }
 
-  loadSceneState(state: GameSceneState): void {
+  loadSceneState(state: ThreeSceneState): void {
     if (this.entities.size > 0) {
       for (const entity of this.entities) {
         this.removeEntity(entity);
@@ -336,7 +332,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
     this.weather.loadState(state.weather);
 
     // Load entities
-    EntityFactory.createAddEntities(this, state.entities);
+    createAddEntities(this, state.entities);
 
     // Load physics state
     this.physics.loadState(state.physics);
@@ -446,7 +442,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
 
   // Collision management
   
-  addCollider(collider: ICollisionHandler | ICollisionHandler[]) {
+  addCollider(collider: CollisionCallback | CollisionCallback[]) {
     this.collision.add(collider);
   }
 

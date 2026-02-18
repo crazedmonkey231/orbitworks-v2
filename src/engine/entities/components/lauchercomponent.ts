@@ -1,16 +1,15 @@
 import * as THREE from "three";
 import {
-  Entity,
   EntityComponentState,
   EntityState,
   GameplayTag,
   UpdateArgs,
   GameplayTags,
-} from "../../core";
+} from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
-import { EntityFactory, EntityTypes } from "../../entityfactory";
-import { emissive } from "three/tsl";
+import { createEntity, EntityTypes } from "../../entityfactory";
 import { RigidBody } from "../../physics";
+import { Entity } from "../../entity";
 
 /** A basic implementation of an entity component */
 export class LauncherComponent extends EntityComponentBase {
@@ -81,7 +80,7 @@ export class LauncherComponent extends EntityComponentBase {
       },
     };
 
-    const spawnedProjectile = EntityFactory.createEntity(
+    const spawnedProjectile = createEntity(
       this.getThreeScene(),
       boxData,
     );

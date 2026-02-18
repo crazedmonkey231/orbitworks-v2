@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Howl, Howler } from "howler";
-import { UpdateArgs } from "./core";
+import { UpdateArgs } from "./types";
 import { AudioPath } from "./paths";
 
 const POSITION_EPS = 1e-4

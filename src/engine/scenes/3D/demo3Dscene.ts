@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { ThreeSceneBase } from "../../threescenebase";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { EntityFactory } from "../../entityfactory";
-import { UpdateArgs, EntityState } from '../../core';
+import { UpdateArgs, EntityState } from '../../types';
+import { createAddEntities } from "../../entityfactory";
 
 export class Demo3DScene extends ThreeSceneBase {
   orbitControls: OrbitControls;
@@ -44,7 +44,7 @@ export class Demo3DScene extends ThreeSceneBase {
         },
       },
     };
-    EntityFactory.createAddEntities(this, [boxData]);
+    createAddEntities(this, [boxData]);
 
     for (let i = 0; i < 15; i++) {
       const boxData: EntityState | any = {
@@ -82,7 +82,7 @@ export class Demo3DScene extends ThreeSceneBase {
           },
         },
       };
-      EntityFactory.createAddEntities(this, [boxData]);
+      createAddEntities(this, [boxData]);
     }
 
     this.orbitControls = new OrbitControls(

@@ -13,7 +13,7 @@ import {
   SSRPass,
   UnrealBloomPass,
 } from "three/examples/jsm/Addons.js";
-import { Shader } from "./core";
+import { Shader } from "./types";
 import { PosterizeShader } from "./shaders/PosterizeShader";
 import { ThreeSceneBase } from "./threescenebase";
 

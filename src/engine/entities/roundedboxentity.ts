@@ -1,8 +1,9 @@
 import * as THREE from "three";
-import { EntityState, UpdateArgs, Transform, Entity } from '../core';
+import { EntityState, UpdateArgs } from '../types';
 import { EntityBase } from "../entitybase";
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { ThreeSceneBase } from "../threescenebase";
+import { Entity } from "../entity";
 
 
 /** A box entity */

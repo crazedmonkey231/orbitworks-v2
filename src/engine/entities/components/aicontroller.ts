@@ -1,8 +1,9 @@
 import * as THREE from "three";
-import { Entity, EntityComponentState, UpdateArgs } from "../../core";
+import { EntityComponentState, UpdateArgs } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
 import { BodyTypes, CharacterController, RigidBody } from "../../physics";
 import { RaycastSensor } from "../../raycastsensor";
+import { Entity } from "../../entity";
 
 /** A basic implementation of an AI controller component */
 export class AiControllerComponent extends EntityComponentBase {

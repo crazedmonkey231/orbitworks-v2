@@ -4,17 +4,16 @@ import { ThreeSceneBase } from "./threescenebase";
 import {
   EntityState,
   XY,
-  GameSceneState,
-  PhysicsState,
-  Entity,
+  ThreeSceneState,
   GameplayTags,
   PhysicsData,
-} from "./core";
+} from "./types";
 import {
   TransformControls,
   TransformControlsMode,
 } from "three/examples/jsm/Addons.js";
-import { EntityFactory } from "./entityfactory";
+import { duplicateEntity } from "./entityfactory";
+import { Entity } from "./entity";
 
 interface EntitySelection {
   entity: Entity;
@@ -56,7 +55,7 @@ export class Editor {
   private propertiesPanel!: Phaser.GameObjects.Container;
   private selected: EntitySelection | null = null;
   private sceneName: string = "my_scene";
-  private stateQueue: GameSceneState[] = [];
+  private stateQueue: ThreeSceneState[] = [];
   private transformControls: TransformControls;
   private gizmo: THREE.Object3D | null = null;
   private toggleGizmo: boolean = true;
@@ -247,7 +246,7 @@ export class Editor {
       ) {
         this.refreshPropertiesPanel();
         const entity = this.selected.entity;
-        const duplicated = EntityFactory.duplicateEntity(
+        const duplicated = duplicateEntity(
           this.threeScene,
           entity,
         );
@@ -352,7 +351,7 @@ export class Editor {
   }
 
   reloadScene(popCached: boolean = false): void {
-    let currentState: GameSceneState | null = null;
+    let currentState: ThreeSceneState | null = null;
     if (popCached) {
       if (this.stateQueue.length > 1) {
         currentState = this.stateQueue.pop()!;

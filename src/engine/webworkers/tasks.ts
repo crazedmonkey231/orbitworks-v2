@@ -1,4 +1,4 @@
-import { WebWorkerPayload, WebWorkerResponse } from "../core";
+import { WebWorkerPayload, WebWorkerResponse } from "../types";
 import { registerWorkerTask } from "./task-registry";
 
 // Example pass through task kept intentionally small.

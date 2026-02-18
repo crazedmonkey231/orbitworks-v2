@@ -1,6 +1,7 @@
 import * as THREE from "three";
-import { Entity, EntityComponentState, UpdateArgs } from "../../core";
+import { EntityComponentState, UpdateArgs } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
+import { Entity } from "../../entity";
 
 /** A basic implementation of a spot light component */
 export class SpotLightComponent extends EntityComponentBase {

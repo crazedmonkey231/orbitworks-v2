@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Sky } from "three/examples/jsm/Addons.js";
 import { premGenerator, renderer } from "./game";
-import { UpdateArgs, WeatherState } from "./core";
+import { UpdateArgs, WeatherState } from "./types";
 
 /** 
  * Manages weather effects, time of day, and related environmental settings in the scene.

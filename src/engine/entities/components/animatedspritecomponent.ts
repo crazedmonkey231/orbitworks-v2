@@ -1,7 +1,8 @@
 import * as THREE from "three"
-import { Entity, EntityComponentState, UpdateArgs } from "../../core";
+import { EntityComponentState, UpdateArgs } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
 import { disposeObject3D, loadTexture } from "../../utils";
+import { Entity } from "../../entity";
 
 /** A basic implementation of an entity component */
 export class AnimatedSpriteComponent extends EntityComponentBase {

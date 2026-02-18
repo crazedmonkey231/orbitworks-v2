@@ -1,4 +1,4 @@
-import { Entity, EntityComponent, EntityComponentState } from './core';
+import { EntityComponentState } from './types';
 import { BasicEntityComponent } from "./entities/components/basiccomponent";
 import { SpotLightComponent } from './entities/components/spotlightcomponent';
 import { ImpulseComponent } from "./entities/components/impulsecomponent";
@@ -15,6 +15,8 @@ import { HealthComponent } from './entities/components/healthcomponent';
 import { ParticleBurstComponent } from './entities/components/particleburstcomponent';
 import { ConvergenceBurstComponent } from './entities/components/convergenceburst';
 import { AnimatedSpriteComponent } from './entities/components/animatedspritecomponent';
+import { Entity } from './entity';
+import { EntityComponent } from './entitycomp';
 
 /** EntityComponentTypeMap defines a mapping from component type strings to their corresponding component classes */
 interface EntityComponentTypeMap {

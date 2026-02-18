@@ -1,18 +1,19 @@
 import * as THREE from "three";
-import { Entity, ICollisionHandler, UpdateArgs } from "./core";
+import { CollisionCallback, UpdateArgs } from "./types";
+import { Entity } from "./entity";
 
 /** 
  * Collision manager to handle collision detection and response.
  * Uses simple AABB collision detection for rough collisions, and allows registering custom collision handlers for more specific collisions between entities.
  */
 export class CollisionManager {
-  private handlers = new Map<string, ICollisionHandler>();
+  private handlers = new Map<string, CollisionCallback>();
   private static tmpBoxA = new THREE.Box3(); // Reusable boxes for collision checks to avoid allocations
   private static tmpBoxB = new THREE.Box3();
   constructor() {}
 
   /** Add a collider or an array of colliders */
-  add(collider: ICollisionHandler | ICollisionHandler[]): void {
+  add(collider: CollisionCallback | CollisionCallback[]): void {
     if (Array.isArray(collider)) {
       collider.forEach((col) => this.handlers.set(col.name, col));
     } else {
@@ -30,13 +31,13 @@ export class CollisionManager {
   }
 
   /** Get a collider by name */
-  get(name: string): ICollisionHandler | undefined {
+  get(name: string): CollisionCallback | undefined {
     return this.handlers.get(name);
   }
 
   /** Create and add a new collider */
-  make(name: string, entitiesA: Set<Entity>, entitiesB: Set<Entity>, onCollision: (A: Entity, B: Entity) => void): ICollisionHandler {
-    const collider: ICollisionHandler = {
+  make(name: string, entitiesA: Set<Entity>, entitiesB: Set<Entity>, onCollision: (A: Entity, B: Entity) => void): CollisionCallback {
+    const collider: CollisionCallback = {
       name,
       entitiesA,
       entitiesB,

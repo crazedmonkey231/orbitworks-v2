@@ -1,7 +1,8 @@
 import * as THREE from "three";
-import { Entity, EntityComponentState, UpdateArgs } from "../../core";
+import { EntityComponentState, UpdateArgs } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
 import { disposeObject3D } from '../../utils';
+import { Entity } from "../../entity";
 
 /** A component that creates a burst of particles converging towards a target position */
 export class ConvergenceBurstComponent extends EntityComponentBase {
