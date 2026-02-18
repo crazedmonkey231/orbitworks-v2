@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Sky } from "three/examples/jsm/Addons.js";
-import { premGenerator, renderer } from "./game";
+import { premGenerator, renderer } from "./renderer";
 import { UpdateArgs, WeatherState } from "./types";
 
 /** 

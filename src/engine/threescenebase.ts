@@ -11,7 +11,7 @@ import {
   CollisionCallback,
   XY,
 } from "./types";
-import { renderer, resizeThree } from "./game";
+import { renderer, resizeThree } from "./renderer";
 import { PostProcess } from "./postprocess";
 import { WeatherManager } from "./weather";
 import { AudioManager } from "./audio";
