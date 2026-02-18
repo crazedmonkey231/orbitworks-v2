@@ -11,7 +11,7 @@ export abstract class EntityComponentBase implements EntityComponent {
 
   constructor(entity: Entity, state: EntityComponentState) {
     this.setName(state.name);
-    this.compType = state.compType;
+    this.setCompType(state.compType);
     this.setEntity(entity);
   }
 
@@ -19,6 +19,10 @@ export abstract class EntityComponentBase implements EntityComponent {
 
   setName(name: string): void {
     this.name = name;
+  }
+
+  setCompType(compType: string): void {
+    this.compType = compType;
   }
 
   setEntity(entity: Entity): void {
@@ -40,7 +44,7 @@ export abstract class EntityComponentBase implements EntityComponent {
     if (!entity) {
       throw new Error("EntityComponentBase: No entity attached to component.");
     }
-    return entity.getGameScene();
+    return entity.getThreeScene();
   }
 
   // Helpers
@@ -50,6 +54,8 @@ export abstract class EntityComponentBase implements EntityComponent {
   }
 
   // Lifecycle methods
+
+  collide?(otherEntity: Entity, started: boolean): void;
 
   /** onUpdate for custom update logic */
   abstract onUpdate(args: UpdateArgs): void;
@@ -82,7 +88,5 @@ export abstract class EntityComponentBase implements EntityComponent {
     };
   }
   
-  loadState(state: EntityComponentState): void {
-    // Load state properties as needed
-  }
+  abstract loadState(state: EntityComponentState): void;
 }

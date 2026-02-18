@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EntityState, UpdateArgs, Transform } from '../core';
+import { EntityState, UpdateArgs, Transform, Entity } from '../core';
 import { EntityBase } from "../entitybase";
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { ThreeSceneBase } from "../threescenebase";
@@ -31,7 +31,8 @@ export class RoundedBoxEntity extends EntityBase {
     mesh.receiveShadow = true;
     return mesh;
   }
-
+  
+  onCollide(otherEntity: Entity, started: boolean): void { }
   onUpdate(args: UpdateArgs): void { }
   onDestroy(): void { }
 }

@@ -7,7 +7,6 @@ const POSITION_EPS = 1e-4
 const ORIENTATION_EPS = 1e-4
 
 class Listener {
-  static instance = null as Listener | null // Singleton instance of the Listener class
   initialized: boolean = false
   position: THREE.Vector3 = new THREE.Vector3()
   forward: THREE.Vector3 = new THREE.Vector3(0, 0, -1)
@@ -20,11 +19,6 @@ class Listener {
   lastUp = new THREE.Vector3(NaN, NaN, NaN)
   camera!: THREE.Camera;
   constructor(camera: THREE.Camera) {
-    if (Listener.instance) {
-      console.warn("Listener instance already exists. Returning existing instance.");
-      return Listener.instance;
-    }
-    Listener.instance = this;
     this.camera = camera;
   }
 
@@ -217,5 +211,6 @@ export class AudioManager {
     this.stopMusic(0);
     this.unloadAllSounds();
     this.listener.dispose();
+    this.listener = null as any;
   }
 }

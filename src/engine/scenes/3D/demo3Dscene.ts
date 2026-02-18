@@ -11,7 +11,7 @@ export class Demo3DScene extends ThreeSceneBase {
       fov: 75,
       near: 0.1,
       far: 1000,
-      physicsState: { enabled: true, helper: true },
+      physicsState: { enabled: false, helper: false },
     };
     super(phaserScene, gameSceneOptions);
 

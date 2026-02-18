@@ -1,25 +1,32 @@
 import * as THREE from "three";
-import { Entity, EntityState, UpdateArgs } from "../core";
+import { Entity, EntityState, UpdateArgs } from '../core';
 import { EntityBase } from "../entitybase";
 import { ThreeSceneBase } from "../threescenebase";
+import { createCheckerTexture } from "../utils";
 
-/** A capsule entity */
-export class CapsuleEntity extends EntityBase {
+
+/** 
+ * A box entity.
+ * Entities must apply the transforms for physics to work properly.
+ */
+export class CheckerBoxEntity extends EntityBase {
   constructor(threeScene: ThreeSceneBase, state: EntityState) {
     super(threeScene, state);
   }
-
+  
   createObject3D(entityState: EntityState): THREE.Object3D {
     const transform = entityState.userData.transform!;
-    const radius = entityState.userData.radius * transform.scale.x;
+    const width = entityState.userData.width * transform.scale.x;
     const height = entityState.userData.height * transform.scale.y;
-    entityState.userData.radius = radius;
+    const depth = entityState.userData.depth * transform.scale.z;  
+    entityState.userData.width = width;
     entityState.userData.height = height;
+    entityState.userData.depth = depth;
     transform.scale = new THREE.Vector3(1, 1, 1);
-    const segments = entityState.userData.segments || 16;
     const materialData = entityState.userData.material || {};
     materialData.color = materialData.color ?? 0x00ff00;
-    const geometry = new THREE.CapsuleGeometry(radius, height, segments, segments);
+    materialData.roughnessMap = createCheckerTexture(entityState.userData.repeat || 1);
+    const geometry = new THREE.BoxGeometry(width, height, depth);
     const material = new THREE.MeshStandardMaterial(materialData);
     const mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = true;

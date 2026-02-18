@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EntityState, UpdateArgs } from '../core';
+import { Entity, EntityState, UpdateArgs } from '../core';
 import { EntityBase } from "../entitybase";
 import { ThreeSceneBase } from "../threescenebase";
 
@@ -23,7 +23,7 @@ export class BoxEntity extends EntityBase {
     entityState.userData.depth = depth;
     transform.scale = new THREE.Vector3(1, 1, 1);
     const materialData = entityState.userData.material || {};
-    materialData.color = materialData.color ?? 0x00ff00;
+    materialData.color = entityState.userData.color ?? 0x00ff00;
     const geometry = new THREE.BoxGeometry(width, height, depth);
     const material = new THREE.MeshStandardMaterial(materialData);
     const mesh = new THREE.Mesh(geometry, material);
@@ -31,7 +31,8 @@ export class BoxEntity extends EntityBase {
     mesh.receiveShadow = true;
     return mesh;
   }
-
+  
+  onCollide(otherEntity: Entity, started: boolean): void { }
   onUpdate(args: UpdateArgs): void { }
   onDestroy(): void { }
 }

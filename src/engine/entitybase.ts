@@ -10,6 +10,8 @@ import {
   PhysicsData,
   Transform,
   UpdateArgs,
+  UpdateType,
+  UpdateTypes,
   UserData,
 } from "./core.js";
 import { ThreeSceneBase } from "./threescenebase.js";
@@ -114,9 +116,13 @@ export abstract class EntityBase implements Entity {
     this.userData.physics = physicsBodyData;
   }
 
+  setUpdateType(updateType: UpdateType): void {
+    this.userData.updateType = updateType;
+  }
+
   // Getters
 
-  getGameScene(): ThreeSceneBase {
+  getThreeScene(): ThreeSceneBase {
     return this.threeScene;
   }
 
@@ -126,6 +132,10 @@ export abstract class EntityBase implements Entity {
 
   getAsMesh(): THREE.Mesh | undefined {
     return this.object3D as THREE.Mesh;
+  }
+
+  getName(): string {
+    return this.object3D.name;
   }
 
   getEntityType(): string {
@@ -152,16 +162,19 @@ export abstract class EntityBase implements Entity {
     return this.userData;
   }
 
-  getPhysicsData(): PhysicsData | undefined {
-    return this.userData.physicsData;
+  getPhysicsData(): PhysicsData {
+    return this.userData.physicsData || {} as PhysicsData;
   }
 
-  getPhysicsBodyData(): PhysicsBodyData | undefined {
-    return this.userData.physics;
+  getPhysicsBodyData(): PhysicsBodyData {
+    return this.userData.physics || {
+      body: undefined,
+      collider: undefined,
+    } as PhysicsBodyData;
   }
 
-  getMaterialData(): MaterialData | undefined {
-    return this.userData.materialData;
+  getMaterialData(): MaterialData {
+    return this.userData.material || {};
   }
 
   getTransform(): Transform {
@@ -170,6 +183,22 @@ export abstract class EntityBase implements Entity {
       rotation: this.object3D.rotation.clone(),
       scale: this.object3D.scale.clone(),
     };
+  }
+
+  getColliderHandle(): number[] {
+    const physicsBodyData = this.getPhysicsBodyData();
+    if (physicsBodyData.collider) {
+      if (Array.isArray(physicsBodyData.collider)) {
+        return physicsBodyData.collider.map((collider) => collider.handle);
+      } else {
+        return [physicsBodyData.collider.handle];
+      }
+    }
+    return [];
+  }
+
+  getUpdateType(): UpdateType {
+    return this.userData.updateType || UpdateTypes.Normal;
   }
 
   // Tag management
@@ -265,6 +294,25 @@ export abstract class EntityBase implements Entity {
 
   // Lifecycle methods
 
+  abstract onCollide(otherEntity: Entity, started: boolean): void;
+
+  collide(otherEntity: Entity, started: boolean): void {
+    this.onCollide(otherEntity, started);
+    for (const component of this.components) {
+      if (component.collide) {
+        component.collide(otherEntity, started);
+      }
+    }
+  }
+
+  damage(amount: number, sourceEntity?: Entity): void {
+    for (const component of this.components) {
+      if (component.damage) {
+        component.damage(amount, sourceEntity);
+      }
+    }
+  }
+
   /** onUpdate is overridden by subclasses to implement custom update logic */
   abstract onUpdate(args: UpdateArgs): void;
 
@@ -283,7 +331,7 @@ export abstract class EntityBase implements Entity {
     if (!this.object3D) return; // Already killed or not properly initialized
     this.alive = false;
     this.onDestroy();
-    this.getGameScene()?.removeEntity(this, false);
+    this.getThreeScene()?.removeEntity(this, false);
     if (this.object3D.userData.entity) {
       delete this.object3D.userData.entity;
     }
@@ -310,6 +358,7 @@ export abstract class EntityBase implements Entity {
     this.userData = {
       ...this.userData,
       transform: this.getTransform(),
+      physics: undefined
     };
     return {
       name: this.object3D.name,

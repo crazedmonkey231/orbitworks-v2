@@ -12,6 +12,7 @@ import {
   WebWorkerPayload,
   ICollisionHandler,
   XY,
+  UpdateTypes,
 } from "./core";
 import { EntityFactory } from "./entityfactory";
 import { renderer, resizeThree } from "./game";
@@ -20,7 +21,7 @@ import { WeatherManager } from "./weather";
 import { AudioManager } from "./audio";
 import { CollisionManager } from "./collision";
 import { MultiplayerManager } from "./multiplayer";
-import { Physics } from "./physics";
+import { CharacterController, Physics, PhysicsCollisionData } from "./physics";
 import { WebWorkerHandle, WebWorkerManager } from "./webworker";
 import { LevelPath } from "./paths";
 
@@ -94,6 +95,12 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
 
   log(message: any, ...optionalParams: any[]): void {
     console.log(`[${this.constructor.name}]`, message, ...optionalParams);
+  }
+
+  // Input management
+
+  addKey(key: string): Phaser.Input.Keyboard.Key | undefined {
+    return this.phaserScene.input.keyboard?.addKey(key);
   }
 
   // Entity management
@@ -205,6 +212,10 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
     return this.webWorker;
   }
 
+  getAllEntities(): Entity[] {
+    return Array.from(this.entities);
+  }
+
   // Tween management
 
   addTween(tween: Tween): void {
@@ -220,6 +231,10 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
   }
 
   // Lifecycle and state management
+
+  togglePause(): void {
+    this.paused = !this.paused;
+  }
 
   /** Optional method for logic that should run before the main update loop, such as input handling or pre-update calculations */
   preUpdate?(args: UpdateArgs): void;
@@ -238,11 +253,15 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
       this.collision.update(args);
       this.audio.update(args);
       for (const entity of this.entities) {
+        if (entity.getUpdateType() !== UpdateTypes.Normal){
+          continue; // Skip entities that are not meant to be updated in the main loop
+        }
         this.physics.syncEntity(entity);
-        entity.update(args);
         if (entity.getObject3D().position.y < this.killY) {
           this.removeEntity(entity);
+          continue;
         }
+        entity.update(args);
       }
       this.onUpdate(args);
       this.postUpdate?.(args);
@@ -287,8 +306,8 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
         },
       },
       weather: this.weather.saveState(),
-      entities: Array.from(this.entities).map((entity) => entity.saveState()),
       physics: this.physics.saveState(),
+      entities: Array.from(this.entities).map((entity) => entity.saveState()),
     };
     return state;
   }
@@ -340,10 +359,10 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${LevelPath(filename)}.json`;
+    a.download = `${filename}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    console.log(`Saved scene to ${LevelPath(filename)}.json`);
+    console.log(`Saved scene to ${filename}.json`);
   }
 
   // Camera management
@@ -389,6 +408,10 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
 
   setTimeOfDay(timeOfDay: number): void {
     this.weather.setTimeOfDay(timeOfDay);
+  }
+
+  getTimeOfDay(): number {
+    return this.weather.getTimeOfDay();
   }
 
   // Audio management
@@ -469,12 +492,32 @@ export abstract class ThreeSceneBase extends THREE.Scene implements GameScene {
   }
 
   addImpulseAtPoint(
-    impulse: THREE.Vector3,
     point: THREE.Vector3,
     strength: number = 1,
     range: number = 5,
   ): void {
-    this.physics.addImpulseAtPoint(impulse, point, strength, range);
+    this.physics.addImpulseAtPoint(point, strength, range);
+  }
+
+  createCharacterController(gap?: number): CharacterController {
+    return this.physics.createController(gap);
+  }
+
+  removeCharacterController(controller: CharacterController): void {
+    this.physics.removeController(controller);
+  }
+
+  getEntityFromColliderHandle(handle: number): Entity | undefined {
+    return this.physics.getEntityByHandle(handle);
+  }
+
+  entityCollision(entityA: Entity, entityB: Entity, started: boolean): void {
+    entityA.collide(entityB, started);
+    entityB.collide(entityA, started);
+  }
+
+  setBodyCollisionData(entity: Entity, data: PhysicsCollisionData): void{
+    this.physics.setBodyCollisionData(entity, data);
   }
 
   // WebWorker management

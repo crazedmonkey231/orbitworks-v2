@@ -4,14 +4,12 @@ import { EntityComponentBase } from "../../entitycompbase";
 
 /** A basic impulse component */
 export class ImpulseComponent extends EntityComponentBase {
-  private force: THREE.Vector3;
+  private force: THREE.Vector3 = new THREE.Vector3();
   private timeAccumulator: number = 0;
   private lifetime: number = 1;
   constructor(entity: Entity, state: EntityComponentState) {
     super(entity, state);
-    const {fx, fy, fz} = state.force as any;
-    this.force = new THREE.Vector3(fx, fy, fz);
-    this.lifetime = state.lifetime || this.lifetime;
+    this.loadState(state);
   }
 
   onUpdate(args: UpdateArgs): void {
@@ -23,7 +21,7 @@ export class ImpulseComponent extends EntityComponentBase {
       entity?.removeComponent(name);
       return;
     }
-    entity?.getGameScene()?.addImpulse(entity, this.force, 1);
+    entity?.getThreeScene()?.addImpulse(entity, this.force, 1);
     if (this.lifetime === -1) return;
     this.timeAccumulator += args.deltaTime;
     if (this.timeAccumulator >= this.lifetime) {
@@ -45,8 +43,7 @@ export class ImpulseComponent extends EntityComponentBase {
   }
 
   loadState(state: EntityComponentState): void {
-    super.loadState(state);
-    const {fx, fy, fz} = state.force as any; // Cast to any to access custom properties
+    const {fx, fy, fz} = state.force as any;
     this.force.set(fx, fy, fz);
     this.lifetime = state.lifetime || this.lifetime;
   }

@@ -8,7 +8,7 @@ export class AudioComponent extends EntityComponentBase {
   private audioKey: string = "";
   constructor(entity: Entity, state: EntityComponentState) {
     super(entity, state);
-    this.audioKey = state.audioKey || this.audioKey;
+    this.loadState(state);
   }
 
   playAudio(): void {
@@ -33,7 +33,6 @@ export class AudioComponent extends EntityComponentBase {
   }
 
   loadState(state: EntityComponentState): void {
-    super.loadState(state);
     this.audioKey = state.audioKey || this.audioKey;
   }
 }

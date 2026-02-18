@@ -5,7 +5,7 @@ import { IUniform } from 'three';
 import { RigidBody } from '@dimforge/rapier3d-compat';
 import { Collider } from '@dimforge/rapier3d-compat';
 import { ThreeSceneBase } from './threescenebase';
-import { Physics, PhysicsBodyData } from './physics';
+import { CharacterController, Physics, PhysicsBodyData, PhysicsCollisionData } from './physics';
 import { MultiplayerManager } from './multiplayer';
 import { CollisionManager } from './collision';
 import { AudioManager } from './audio';
@@ -47,6 +47,13 @@ export const GameplayTags = {
   Boss: 'boss',
   Environment: 'environment',
 } as const;
+
+export const UpdateTypes = {
+  None: 'none',
+  Normal: 'normal',
+}
+
+export type UpdateType = typeof UpdateTypes[keyof typeof UpdateTypes];
 
 /** Type representing a 2D vector with x, y components */
 export interface XY {
@@ -115,13 +122,15 @@ export interface EntityComponent {
   isNameEqual(name: string): boolean;
 
   // Lifecycle methods
+  collide?(otherEntity: Entity, started: boolean): void;
+  damage?(amount: number, sourceEntity?: Entity): void;
   update(args: UpdateArgs): void;
   dispose(): void; // Cleans up resources but does not remove itself from the entity
   removeFromEntity(): void;
 
   // State management for saving/loading
   saveState(): EntityComponentState;
-  loadState(state: EntityComponentState): void;
+  // loadState(state: EntityComponentState): void;
 }
 
 /** Collider component interface */
@@ -142,6 +151,7 @@ export interface PhysicsData {
 
 /** Type for user-defined data attached to entities */
 export interface UserData {
+  updateType?: UpdateType;
   transform?: Transform;
   physicsData?: PhysicsData;
   physics?: PhysicsBodyData;
@@ -163,21 +173,25 @@ export interface Entity {
   setName(name: string): void;
   setTransform(transform: Transform): void;
   setPhysicsBodyData(physicsBodyData?: PhysicsBodyData): void;
+  setUpdateType(updateType: UpdateType): void;
 
   // Getters
-  getGameScene(): ThreeSceneBase;
+  getThreeScene(): ThreeSceneBase;
   getObject3D(): THREE.Object3D;
   getAsMesh(): THREE.Mesh | undefined;
+  getName(): string;
   getEntityType(): string;
   getAlive(): boolean;
   getTags(): Set<string>;
   getGameplayTags(): Set<GameplayTag>;
   getComponents(): EntityComponent[];
   getUserData(): UserData;
-  getPhysicsData(): PhysicsData | undefined;
-  getPhysicsBodyData(): PhysicsBodyData | undefined;
-  getMaterialData(): MaterialData | undefined;
+  getPhysicsData(): PhysicsData;
+  getPhysicsBodyData(): PhysicsBodyData;
+  getMaterialData(): MaterialData;
   getTransform(): Transform;
+  getColliderHandle(): number[];
+  getUpdateType(): UpdateType;
 
   // Tag management
   addTag(tag: string): void;
@@ -199,6 +213,8 @@ export interface Entity {
   detachObject3D(object3D: THREE.Object3D): void;
   
   // Lifecycle methods
+  collide(otherEntity: Entity, started: boolean): void;
+  damage(amount: number, sourceEntity?: Entity): void;
   update(args: UpdateArgs): void;
   kill(): void;
   
@@ -286,6 +302,9 @@ export interface GameScene {
   // Logging
   log(message: any, ...optionalParams: any[]): void;
 
+  // Input management
+  addKey(key: string): Phaser.Input.Keyboard.Key | undefined;
+
   // Entity management
   addEntity(entity: Entity): void;
   removeEntity(entity: Entity): void;
@@ -306,6 +325,7 @@ export interface GameScene {
   getKillY(): number;
   getPhaserScene(): Phaser.Scene;
   getEntities(): Set<Entity>;
+  getAllEntities(): Entity[];
   getCamera(): THREE.PerspectiveCamera;
   getPostProcess(): PostProcess;
   getWeatherManager(): WeatherManager;
@@ -321,6 +341,7 @@ export interface GameScene {
   isTweening(target: any): boolean;
 
   // Lifecycle and state management
+  togglePause(): void;
   update(args: UpdateArgs): void;
   dispose(): void;
 
@@ -340,6 +361,7 @@ export interface GameScene {
 
   // Weather management
   setTimeOfDay(timeOfDay: number): void;
+  getTimeOfDay(): number;
 
   // Audio management
   loadSounds(keys: string[], loop?: boolean, volume?: number): void;
@@ -364,7 +386,12 @@ export interface GameScene {
   addPhysicsObject(entity: Entity): void;
   removePhysicsObject(entity: Entity): void;
   addImpulse(entity: Entity, impulse: THREE.Vector3, strength: number, index?: number): void;
-  addImpulseAtPoint(impulse: THREE.Vector3, point: THREE.Vector3, strength: number, range: number): void;
+  addImpulseAtPoint(point: THREE.Vector3, strength: number, range: number): void;
+  createCharacterController(gap?: number): CharacterController;
+  removeCharacterController(controller: CharacterController): void;
+  getEntityFromColliderHandle(handle: number): Entity | undefined;
+  entityCollision(entityA: Entity, entityB: Entity, started: boolean): void;
+  setBodyCollisionData(entity: Entity, data: PhysicsCollisionData): void;
 
   // WebWorker management
   createWebWorker(taskName: string, workerUrl?: string): WebWorkerHandle;

@@ -101,10 +101,10 @@ export function getCaretIndexFromPointer(
 // three.js models
 const gltfLoader = new GLTFLoader();
 /** Load a GLTF model from models folder */
-export function loadGLTF(path: string): Promise<THREE.Object3D> {
+export function loadGLTF(path: string, ext: string = ".glb"): Promise<THREE.Object3D> {
   return new Promise((resolve, reject) => {
     gltfLoader.load(
-      ModelPath(path),
+      ModelPath(path + ext),
       (gltf) => {
         const child = gltf.scene.children[0];
         child.traverse((node: any) => {
@@ -116,7 +116,7 @@ export function loadGLTF(path: string): Promise<THREE.Object3D> {
         resolve(child);
       },
       undefined,
-      reject
+      reject,
     );
   });
 }
@@ -124,10 +124,13 @@ export function loadGLTF(path: string): Promise<THREE.Object3D> {
 // load a texture
 const textureLoader = new THREE.TextureLoader();
 /** Load a texture from textures folder */
-export function loadTexture(path: string): Promise<THREE.Texture> {
+export function loadTexture(
+  path: string,
+  ext: string = ".png",
+): Promise<THREE.Texture> {
   return new Promise((resolve, reject) => {
     textureLoader.load(
-      TexturePath(path),
+      TexturePath(path + ext),
       (texture) => {
         texture.magFilter = THREE.NearestFilter;
         texture.minFilter = THREE.NearestFilter;
@@ -136,7 +139,7 @@ export function loadTexture(path: string): Promise<THREE.Texture> {
         resolve(texture);
       },
       undefined,
-      reject
+      reject,
     );
   });
 }
@@ -152,7 +155,7 @@ export function generateNoise(
   scaleX: number = 10,
   scaleZ: number = 10,
   strength: number = 0.3,
-  noiseClass: any = null
+  noiseClass: any = null,
 ): number {
   const ImprovedNoiseClass = noiseClass || ImprovedNoise;
   const noise = new ImprovedNoiseClass();
@@ -164,8 +167,8 @@ export function generateNoise(
   const height =
     heightOffset +
     (noise.noise(x / amplitude, z / amplitude, seed) + 1) *
-    generateHeightVariation() *
-    scaleX;
+      generateHeightVariation() *
+      scaleX;
   return Math.floor(height);
 }
 
@@ -178,7 +181,7 @@ export function getKey(vector: THREE.Vector3): string {
 export function getChunkPosition(
   position: THREE.Vector3,
   chunkSize: number,
-  outVector?: THREE.Vector3
+  outVector?: THREE.Vector3,
 ): THREE.Vector3 {
   const cx = Math.floor(position.x / chunkSize);
   const cy = Math.floor(position.y / chunkSize);
@@ -192,6 +195,34 @@ export function getChunkPosition(
 }
 
 /** Get chunk key from chunk position */
-export function getChunkKey(chunkPos: THREE.Vector3, chunkSize: number): string {
+export function getChunkKey(
+  chunkPos: THREE.Vector3,
+  chunkSize: number,
+): string {
   return getKey(getChunkPosition(chunkPos, chunkSize));
+}
+
+/** Creates a checkerboard texture */
+export function createCheckerTexture(repeat = 1) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 2;
+  canvas.height = 2;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error("Failed to create canvas context");
+  }
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, 2, 2);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, 1, 1);
+  ctx.fillRect(1, 1, 1, 1);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.repeat.set(repeat, repeat);
+  texture.magFilter = THREE.NearestFilter;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+
+  return texture;
 }

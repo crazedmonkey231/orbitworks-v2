@@ -7,19 +7,17 @@ export class PointLightComponent extends EntityComponentBase {
   private light!: THREE.PointLight;
   constructor(entity: Entity, state: EntityComponentState) {
     super(entity, state);
-    const color = state.color || 0xffffff;
-    const intensity = state.intensity || 1;
-    const distance = state.distance || 100;
-    this.light = new THREE.PointLight(color, intensity, distance);
-    this.light.castShadow = true;
-    entity.attachObject3D(this.light);
+    this.loadState(state);
   }
 
   onUpdate(args: UpdateArgs): void { }
 
   onDispose(): void {
-    this.getEntity()?.detachObject3D(this.light);
-    this.light.dispose();
+    if (this.light) {
+      this.getEntity()?.detachObject3D(this.light);
+      this.light.dispose();
+      this.light = undefined as any;
+    }
    }
 
   saveState(): EntityComponentState {
@@ -34,9 +32,15 @@ export class PointLightComponent extends EntityComponentBase {
   }
 
   loadState(state: EntityComponentState): void {
-    super.loadState(state);
-    this.light.color.setHex(state.color || 0xffffff);
-    this.light.intensity = state.intensity || 1;
-    this.light.distance = state.distance || 100;
+    const entity = this.getEntity();
+    if (!entity) {
+      throw new Error("PointLightComponent: No entity attached to component.");
+    }
+    const color = state.color || 0xffffff;
+    const intensity = state.intensity || 1;
+    const distance = state.distance || 10;
+    this.light = new THREE.PointLight(color, intensity, distance);
+    this.light.castShadow = true;
+    entity.attachObject3D(this.light);
   }
 }

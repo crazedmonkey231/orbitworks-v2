@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EntityState, UpdateArgs } from "../core";
+import { Entity, EntityState, UpdateArgs } from "../core";
 import { EntityBase } from "../entitybase";
 import { ThreeSceneBase } from "../threescenebase";
 
@@ -25,6 +25,7 @@ export class SphereEntity extends EntityBase {
     return mesh;
   }
 
+  onCollide(otherEntity: Entity, started: boolean): void { }
   onUpdate(args: UpdateArgs): void { }
   onDestroy(): void { }
 }

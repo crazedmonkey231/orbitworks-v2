@@ -1,18 +1,91 @@
 import * as THREE from "three";
 import * as RAPIER from "@dimforge/rapier3d";
 import { RapierHelper } from "three/addons/helpers/RapierHelper.js";
-import {
-  Entity,
-  PhysicsState,
-  Transform,
-  UpdateArgs,
-  XYZ,
-} from "./core";
+import { Entity, PhysicsState, Transform, UpdateArgs } from "./core";
 import { ThreeSceneBase } from "./threescenebase";
 
+// Re-export RAPIER types for convenience and variables for the physics system
+
+export type RigidBody = RAPIER.RigidBody;
+export type Collider = RAPIER.Collider;
+
 export interface PhysicsBodyData {
-  body: RAPIER.RigidBody | RAPIER.RigidBody[];
-  collider: RAPIER.Collider | RAPIER.Collider[];
+  body: RigidBody | RigidBody[] | undefined;
+  collider: Collider | Collider[] | undefined;
+}
+
+export type CharacterController = RAPIER.KinematicCharacterController;
+
+export const BodyTypes = {
+  Static: RAPIER.RigidBodyType.Fixed,
+  Dynamic: RAPIER.RigidBodyType.Dynamic,
+  Kinematic: RAPIER.RigidBodyType.KinematicPositionBased,
+};
+
+export type BodyType = (typeof BodyTypes)[keyof typeof BodyTypes];
+
+export const ActiveCollisionTypes = RAPIER.ActiveCollisionTypes;
+export const ActiveEvents = RAPIER.ActiveEvents;
+
+export const COLLISION_GROUP = {
+  World: 0,
+  Player: 1,
+  Projectile: 2,
+  Enemy: 3,
+  Spawner: 4,
+  Sensor: 5,
+} as const;
+
+const RAPIER_MAX_COLLISION_GROUP = 15;
+
+export interface PhysicsCollisionData {
+  memberships: number[];
+  filters: number[];
+  activeCollisionTypes?: RAPIER.ActiveCollisionTypes;
+  activeEvents?: RAPIER.ActiveEvents;
+}
+
+// Utility functions
+
+export function setColliderGroups(
+  colliderData: Collider | Collider[] | null | undefined,
+  groups: number,
+): void {
+  if (!colliderData) return;
+  if (Array.isArray(colliderData)) {
+    colliderData.forEach((collider) => collider.setCollisionGroups(groups));
+    return;
+  }
+  colliderData.setCollisionGroups(groups);
+}
+
+/** Packs Rapier collision groups into `0xMMMMFFFF` (membership/filter). */
+export function createCollisionGroups(
+  memberships: number[],
+  filters: number[],
+): number {
+  const membershipMask = groupsToMask(memberships);
+  const filterMask = groupsToMask(filters);
+  return ((membershipMask & 0xffff) << 16) | (filterMask & 0xffff);
+}
+
+/** Converts group indices (0-15) into a 16-bit mask. */
+export function groupsToMask(groups: number[]): number {
+  if (!groups.length) return 0;
+  let mask = 0;
+  for (const group of groups) {
+    if (
+      !Number.isInteger(group) ||
+      group < 0 ||
+      group > RAPIER_MAX_COLLISION_GROUP
+    ) {
+      throw new Error(
+        `Invalid collision group "${group}". Expected an integer in [0, ${RAPIER_MAX_COLLISION_GROUP}].`,
+      );
+    }
+    mask |= 1 << group;
+  }
+  return mask & 0xffff;
 }
 
 function getShape(geometry: THREE.BufferGeometry): RAPIER.ColliderDesc | null {
@@ -66,6 +139,8 @@ function getShape(geometry: THREE.BufferGeometry): RAPIER.ColliderDesc | null {
   return null;
 }
 
+// The main Physics class that wraps the Rapier physics engine.
+
 /**
  * A wrapper class for the Rapier physics engine.
  * This class manages the physics world and provides methods to add/remove physics-enabled entities.
@@ -82,18 +157,21 @@ export class Physics {
   private _scale = new THREE.Vector3(1, 1, 1);
 
   private physicsState: PhysicsState;
+  private entityBodyHandles = new Map<Entity, number[]>();
 
   constructor(threeScene: ThreeSceneBase, physicsState: PhysicsState) {
     this.physicsState = physicsState;
     this.threeScene = threeScene;
-    this.world = new RAPIER.World(physicsState.gravity || { x: 0, y: -9.81, z: 0 });
+    this.world = new RAPIER.World(
+      physicsState.gravity || { x: 0, y: -9.81, z: 0 },
+    );
     this.eventQueue = new RAPIER.EventQueue(true);
     this.createHelper(this.physicsState);
     console.log("Physics system initialized:", this.physicsState.enabled);
   }
 
   createHelper(physicsState: PhysicsState) {
-    if (physicsState.helper){
+    if (physicsState.helper) {
       if (this.helper) {
         return;
       }
@@ -135,7 +213,39 @@ export class Physics {
   }
 
   toggleEnabled(override?: boolean) {
-    this.setEnabled(override !== undefined ? override : !this.physicsState.enabled);
+    this.setEnabled(
+      override !== undefined ? override : !this.physicsState.enabled,
+    );
+  }
+
+  getEntityByHandle(handle: number): Entity | undefined {
+    for (const [entity, handles] of this.entityBodyHandles.entries()) {
+      if (handles.includes(handle)) {
+        return entity;
+      }
+    }
+    return undefined;
+  }
+
+  setBodyCollisionData(entity: Entity, data: PhysicsCollisionData): void {
+    const physicsData = entity.getPhysicsBodyData();
+    const collider = physicsData?.collider;
+    const collisionGroups = createCollisionGroups(data.memberships, data.filters);
+    setColliderGroups(collider, collisionGroups);
+    if (data.activeCollisionTypes) {
+      if (Array.isArray(collider)) {
+        collider.forEach((c) => c.setActiveCollisionTypes(data.activeCollisionTypes!));
+      } else if (collider) {
+        collider.setActiveCollisionTypes(data.activeCollisionTypes);
+      }
+    }
+    if (data.activeEvents) {
+      if (Array.isArray(collider)) {
+        collider.forEach((c) => c.setActiveEvents(data.activeEvents!));
+      } else if (collider) {
+        collider.setActiveEvents(data.activeEvents);
+      }
+    }
   }
 
   private createBody(
@@ -185,6 +295,14 @@ export class Physics {
     return { body: bodies, collider: colliders };
   }
 
+  createController(gap: number = 0.01): CharacterController {
+    return this.world.createCharacterController(gap);
+  }
+
+  removeController(controller: CharacterController) {
+    this.world.removeCharacterController(controller);
+  }
+
   addEntity(entity: Entity) {
     const mesh = entity.getAsMesh();
     if (!mesh) {
@@ -220,6 +338,10 @@ export class Physics {
       ));
     }
     entity.setPhysicsBodyData({ body, collider } as PhysicsBodyData);
+    this.entityBodyHandles.set(
+      entity,
+      Array.isArray(body) ? body.map((b) => b.handle) : [body.handle],
+    );
   }
 
   private removeBody(body: RAPIER.RigidBody | RAPIER.RigidBody[]) {
@@ -251,6 +373,7 @@ export class Physics {
         this.removeCollider(physics.collider);
       }
       entity.setPhysicsBodyData(undefined);
+      this.entityBodyHandles.delete(entity);
     }
   }
 
@@ -404,9 +527,19 @@ export class Physics {
     if (this.helper) {
       this.helper.update();
     }
-    this.world.step(this.eventQueue);
+    const dt = args.deltaTime;
+    const steps = Math.ceil(dt / (1 / 120));
+    const stepTime = dt / steps;
+    this.world.timestep = stepTime;
+    for (let i = 0; i < steps; i++) {
+      this.world.step(this.eventQueue);
+    }
     this.eventQueue.drainCollisionEvents((handle1, handle2, started) => {
-      // Handle collision events here if needed
+      const entity1 = this.getEntityByHandle(handle1);
+      const entity2 = this.getEntityByHandle(handle2);
+      if (entity1 && entity2) {
+        this.threeScene.entityCollision(entity1, entity2, started);
+      }
     });
   }
 

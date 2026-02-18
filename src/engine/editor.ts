@@ -371,16 +371,12 @@ export class Editor {
   /** Creates the top toolbar with buttons for actions like save/load */
   createTopToolbar(): void {
     const buttonData = [
+      { label: "Toggle Pause", action: () => this.threeScene.togglePause() },
       { label: "Save Scene", action: () => this.saveScene() },
       { label: "Load Scene", action: () => this.loadScene() },
       { label: "Cache Scene", action: () => this.queueSceneStateChange() },
       { label: "Pop Cached", action: () => this.reloadScene(true) },
-      {
-        label: "Toggle Physics",
-        action: () => {
-          this.togglePhysics();
-        },
-      },
+      { label: "Toggle Physics", action: () => this.togglePhysics() },
     ];
     const buttonSpacing = 10;
     let currentX = buttonSpacing;
@@ -404,6 +400,20 @@ export class Editor {
       this.hudContainer,
       (newValue) => {
         this.sceneName = newValue;
+      },
+      100,
+    );
+
+    this.createEditableProperty(
+      "Time of Day",
+      this.threeScene.getTimeOfDay().toString(),
+      { x: currentX + 225, y: 15 },
+      this.hudContainer,
+      (newValue) => {
+        const time = parseFloat(newValue);
+        if (!isNaN(time)) {
+          this.threeScene.setTimeOfDay(time);
+        }
       },
       100,
     );
@@ -556,7 +566,18 @@ export class Editor {
         value: this.selected.state.entityType,
         position: { x: 5, y: 60 },
         onChange: (newValue) => {
-          this.selected!.state.entityType = newValue;
+          // this.selected!.state.entityType = newValue;
+          // Split by # to allow changing type and adding JSON data for components in the future, e.g. "Enemy#{"health":100}"
+          const parts = newValue.split("#").map((part: string) => part.trim());
+          this.selected!.state.entityType = parts[0];
+          if (parts.length > 1) {
+            try {
+              const extraData = JSON.parse(parts[1]);
+              Object.assign(this.selected!.state.userData, extraData);
+            } catch (error) {
+              // console.warn("Failed to parse extra data JSON:", error);
+            }
+          }
         },
       },
       {
@@ -595,11 +616,22 @@ export class Editor {
             .map((name: string) => name.trim());
           const newComponents = [];
           for (const compName of newComponentNames) {
-            const comp = compName.split("#").map((part: string) => part.trim());
-            if (comp.length === 2) {
-              newComponents.push({ name: comp[0], ...JSON.parse(comp[1]) });
-            } else {
-              newComponents.push({ name: comp[0] });
+            try {
+              const comp = compName
+                .split("#")
+                .map((part: string) => part.trim());
+              if (comp.length === 2) {
+                newComponents.push({
+                  name: comp[0],
+                  compType: comp[0],
+                  ...JSON.parse(comp[1]),
+                });
+                console
+              } else {
+                newComponents.push({ name: comp[0], compType: comp[0] });
+              }
+            } catch (error) {
+              // console.warn("Failed to parse component data JSON:", error);
             }
           }
           this.selected!.state.components = newComponents;
