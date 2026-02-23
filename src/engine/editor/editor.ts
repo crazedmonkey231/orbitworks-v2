@@ -378,22 +378,15 @@ export class Editor {
   /** Performs a raycast from the camera based on screen position to select objects in the scene */
   raycastScreenPosition(position: XY): void {
     const filterFunc = (obj: THREE.Object3D) => {
-      if (!obj.visible || !obj) {
-        return false;
-      }
-      if (obj === this.gizmo) {
+      if (obj && obj.visible && (obj.userData.entity || obj === this.gizmo)) {
         return true;
       }
-      if (!(obj instanceof THREE.Mesh)) {
-        return false;
-      }
-      return obj.userData.entity;
+      return false;
     };
     const raycastResult = this.threeScene.raycastFromCamera(
       position,
       filterFunc,
     );
-    // console.log("Raycast result:", raycastResult);
     if (raycastResult.length > 0) {
       const gizmoIdx = raycastResult.findIndex(
         (res) => res.object.parent === this.gizmo,
@@ -401,15 +394,18 @@ export class Editor {
       const selectedObj = raycastResult.findIndex(
         (res) => res.object.userData.entity,
       );
-      // console.log("Gizmo index:", gizmoIdx, "Selected object index:", selectedObj);
-      if (gizmoIdx > 0 && gizmoIdx < selectedObj) {
+      if (gizmoIdx === 0 && selectedObj === -1) {
+        this.deselectObject();
         return;
       }
-      this.selectObject(raycastResult[selectedObj]);
-      return;
+      if (gizmoIdx > 0 && gizmoIdx < selectedObj) {
+        return;
+      } else {
+        this.selectObject(raycastResult[selectedObj]);
+        return;
+      }
     }
     this.deselectObject();
-    return;
   }
 
   /** Creates the properties panel UI based on the currently selected entity */
