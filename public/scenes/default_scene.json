@@ -6,15 +6,21 @@
     "far": 1000,
     "transform": {
       "position": {
-        "x": -2.1293908142491728e-14,
-        "y": 5.00000000000001,
-        "z": 9.999999999999995
+        "x": 20.72559985113454,
+        "y": 14.121539980633521,
+        "z": 10.311197932109284
       },
+      "quaternion": [
+        -0.22993370762314586,
+        0.5069524205216035,
+        0.1424238173218505,
+        0.8184407062734802
+      ],
       "rotation": {
         "isEuler": true,
-        "_x": -0.4636476090008071,
-        "_y": -1.9045850445299112e-15,
-        "_z": -9.52292522264958e-16,
+        "_x": -0.9401043019988843,
+        "_y": 0.8699937726594718,
+        "_z": 0.8082444679279334,
         "_order": "XYZ"
       },
       "scale": {
@@ -28,10 +34,28 @@
     "enabled": false,
     "timeOfDay": 10
   },
+  "physics": {
+    "enabled": false,
+    "helper": false,
+    "gravity": {
+      "x": 0,
+      "y": -9.81,
+      "z": 0
+    }
+  },
+  "speech": {
+    "transcriptHistory": [],
+    "speechParams": {
+      "lang": "en-US",
+      "pitch": 1,
+      "rate": 1.25,
+      "voice": null
+    }
+  },
   "entities": [
     {
       "name": "GroundBox",
-      "entityType": "RoundedBox",
+      "entityType": "Box",
       "tags": [],
       "gameplayTags": [],
       "userData": {
@@ -39,12 +63,14 @@
         "height": 1,
         "depth": 25,
         "material": {
-          "color": 8947848,
+          "color": 65280,
           "metalness": 0.25,
           "roughness": 0.5
         },
         "physicsData": {
           "mass": 0,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.5
         },
         "transform": {
@@ -53,6 +79,12 @@
             "y": -0.5,
             "z": 0
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
             "_x": 0,
@@ -67,12 +99,7 @@
           }
         }
       },
-      "components": [
-        {
-          "name": "BasicEntityComponent",
-          "compType": "BasicComp"
-        }
-      ]
+      "components": []
     },
     {
       "name": "FallingBox0",
@@ -91,20 +118,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": -2.058436632156372,
-            "y": 0.4987039864063263,
-            "z": 0.32059624791145325
+            "x": -0.5720564492735163,
+            "y": 5,
+            "z": 0.946809087294608
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 0.00022210431941645798,
-            "_y": -0.2837612515017893,
-            "_z": -0.00006809592307219586,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -133,20 +168,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": -2.60727858543396,
-            "y": 0.4987235963344574,
-            "z": 2.909219264984131
+            "x": -0.9591195415725715,
+            "y": 7,
+            "z": -0.633054290645285
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 3.141591974574078,
-            "_y": 0.6902174732039028,
-            "_z": 0.0000013608615953705419,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -175,20 +218,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": 2.1296546459198,
-            "y": 0.4987238049507141,
-            "z": 1.4214385747909546
+            "x": 0.16552809830003978,
+            "y": 9,
+            "z": -0.8668276956352201
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 0.0000018375628555778478,
-            "_y": -1.0011911714404416,
-            "_z": 9.838184686318227e-7,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -217,20 +268,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": -1.443382978439331,
-            "y": 0.49851134419441223,
-            "z": -1.129301905632019
+            "x": -0.6376968113006793,
+            "y": 11,
+            "z": 0.208832017838108
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": -0.00006766103756637194,
-            "_y": 0.4045934669180296,
-            "_z": -0.000228865635392225,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -259,20 +318,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": 0.4646017253398895,
-            "y": 0.49872395396232605,
-            "z": -1.1117383241653442
+            "x": -0.43228294795399,
+            "y": 13,
+            "z": 0.322210236888101
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 0.000005885154041844648,
-            "_y": 0.7201009125003837,
-            "_z": -0.000005893953338824683,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -301,20 +368,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": 6.795628547668457,
-            "y": 0.4987238347530365,
-            "z": -5.525448322296143
+            "x": 0.48258945870615055,
+            "y": 15,
+            "z": -0.5901013012708516
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 1.57079528587997,
-            "_y": -0.000001510225082768676,
-            "_z": -1.1503387058346954,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -343,20 +418,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": -0.8192318677902222,
-            "y": 1.238524317741394,
-            "z": -0.3516072928905487
+            "x": -0.14651614163196514,
+            "y": 17,
+            "z": -0.8722416807703417
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": -0.8083024347283535,
-            "_y": 0.2887731212584492,
-            "_z": -1.0122444453346287,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -385,20 +468,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": 3.189868450164795,
-            "y": 0.4987237751483917,
-            "z": -2.5571038722991943
+            "x": 0.9629212093483954,
+            "y": 19,
+            "z": -0.2650947122719558
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 1.570796454664857,
-            "_y": 0.0000011378724107393948,
-            "_z": -3.0985823716885776,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -427,20 +518,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": 0.5706874132156372,
-            "y": 0.4987237751483917,
-            "z": -2.654764413833618
+            "x": 0.41743860172462455,
+            "y": 21,
+            "z": -0.9651515621727758
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": -3.141592451947612,
-            "_y": -0.8026764034111028,
-            "_z": 1.388970811808155e-7,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -469,20 +568,128 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": -0.21365854144096375,
-            "y": 0.49863383173942566,
-            "z": 0.4024007320404053
+            "x": -0.05686294812801873,
+            "y": 23,
+            "z": 0.297447212388962
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 0.0012221540364059467,
-            "_y": -0.7878712942080499,
-            "_z": 1.5713128009725494,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
+            "_order": "XYZ"
+          },
+          "scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          }
+        }
+      },
+      "components": []
+    },
+    {
+      "name": "FallingBox10",
+      "entityType": "RoundedBox",
+      "tags": [],
+      "gameplayTags": [],
+      "userData": {
+        "radius": 0.075,
+        "segments": 5,
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "material": {
+          "color": 35839,
+          "metalness": 0.25,
+          "roughness": 0.25
+        },
+        "physicsData": {
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
+          "restitution": 0.001
+        },
+        "transform": {
+          "position": {
+            "x": 0.613259206350556,
+            "y": 25,
+            "z": -0.6633400798473748
+          },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "rotation": {
+            "isEuler": true,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
+            "_order": "XYZ"
+          },
+          "scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          }
+        }
+      },
+      "components": []
+    },
+    {
+      "name": "FallingBox11",
+      "entityType": "RoundedBox",
+      "tags": [],
+      "gameplayTags": [],
+      "userData": {
+        "radius": 0.075,
+        "segments": 5,
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "material": {
+          "color": 35839,
+          "metalness": 0.25,
+          "roughness": 0.25
+        },
+        "physicsData": {
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
+          "restitution": 0.001
+        },
+        "transform": {
+          "position": {
+            "x": -0.08789945166455615,
+            "y": 27,
+            "z": -0.9678897071153121
+          },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "rotation": {
+            "isEuler": true,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -511,20 +718,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": 1.7994884252548218,
-            "y": 0.498719722032547,
-            "z": -0.7036633491516113
+            "x": -0.8615714126224501,
+            "y": 29,
+            "z": -0.42287579522818763
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 3.1413557090967763,
-            "_y": 1.2277546988922443,
-            "_z": 0.00027840313539576934,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -553,20 +768,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": -8.129136085510254,
-            "y": 0.4987238645553589,
-            "z": -8.388978958129883
+            "x": -0.8779774315469675,
+            "y": 31,
+            "z": -0.6354919176548148
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 3.1415920308394956,
-            "_y": -1.2300713773910292,
-            "_z": -1.5707956456088858,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -595,20 +818,28 @@
           "roughness": 0.25
         },
         "physicsData": {
-          "mass": 10,
+          "mass": 100,
+          "friction": 0.5,
+          "density": 1,
           "restitution": 0.001
         },
         "transform": {
           "position": {
-            "x": 9.10098648071289,
-            "y": 0.4987238943576813,
-            "z": 1.702026128768921
+            "x": 0.7391020618226527,
+            "y": 33,
+            "z": -0.7586984249194133
           },
+          "quaternion": [
+            0,
+            0,
+            0,
+            1
+          ],
           "rotation": {
             "isEuler": true,
-            "_x": 1.5707943475225217,
-            "_y": -0.000007092012960955905,
-            "_z": -0.7597951360123754,
+            "_x": 0,
+            "_y": 0,
+            "_z": 0,
             "_order": "XYZ"
           },
           "scale": {
@@ -620,9 +851,5 @@
       },
       "components": []
     }
-  ],
-  "physics": {
-    "enabled": false,
-    "helper": false
-  }
+  ]
 }

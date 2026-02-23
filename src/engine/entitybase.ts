@@ -31,22 +31,15 @@ export abstract class EntityBase implements Entity {
   private gameplayTags: Set<GameplayTag> = new Set<GameplayTag>();
   private components: EntityComponent[] = [];
   private userData: UserData = {};
-
+  private worldPosition: THREE.Vector3 = new THREE.Vector3();
+  private worldScale: THREE.Vector3 = new THREE.Vector3();
+  private worldQuaternion: THREE.Quaternion = new THREE.Quaternion();
+  private rotation: THREE.Euler = new THREE.Euler();
   constructor(threeScene: ThreeSceneBase, entityState: EntityState) {
     this.setScene(threeScene);
     this.object3D = this.createObject3D(entityState);
     this.object3D.userData.entity = this; // Link back to the entity
-    this.setName(entityState.name);
-    this.setEntityType(entityState.entityType);
-    this.setTags(entityState.tags);
-    this.setGameplayTags(entityState.gameplayTags);
-    this.setUserData(entityState.userData);
-    this.setComponents(entityState.components);
-    if (entityState.userData?.transform) {
-      const t = entityState.userData.transform;
-      this.setTransform(t);
-    }
-    this.setAlive(true);
+    this.loadState(entityState);
   }
 
   /** Subclasses must implement this to define their visual representation */
@@ -95,6 +88,7 @@ export abstract class EntityBase implements Entity {
   setTransform(transform: Transform): void {
     this.object3D.position.copy(transform.position);
     this.object3D.quaternion.copy(transform.quaternion);
+    this.rotation.copy(transform.rotation);
     this.object3D.scale.copy(transform.scale);
   }
 
@@ -169,23 +163,21 @@ export abstract class EntityBase implements Entity {
     return {
       position: this.object3D.position.clone(),
       quaternion: this.object3D.quaternion.clone(),
+      rotation: this.rotation.setFromQuaternion(this.object3D.quaternion),
       scale: this.object3D.scale.clone(),
     };
   }
 
   getWorldTransform(): Transform {
-    const worldPosition = new THREE.Vector3();
-    const worldScale = new THREE.Vector3();
-    const worldQuaternion = new THREE.Quaternion();
     this.object3D.updateMatrixWorld(true);
-    this.object3D.getWorldPosition(worldPosition);
-    this.object3D.getWorldQuaternion(worldQuaternion);
-    this.object3D.getWorldScale(worldScale);
-
+    this.object3D.getWorldPosition(this.worldPosition);
+    this.object3D.getWorldQuaternion(this.worldQuaternion);
+    this.object3D.getWorldScale(this.worldScale);
     return {
-      position: worldPosition,
-      quaternion: worldQuaternion,
-      scale: worldScale,
+      position: this.worldPosition,
+      quaternion: this.worldQuaternion,
+      rotation: this.rotation.setFromQuaternion(this.worldQuaternion),
+      scale: this.worldScale,
     };
   }
 
@@ -373,6 +365,7 @@ export abstract class EntityBase implements Entity {
   }
 
   loadState(data: EntityState): void {
+    // console.log("Loading entity state:", data);
     this.setName(data.name);
     this.setEntityType(data.entityType);
     this.setTransform(data.userData?.transform!);

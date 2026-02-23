@@ -1,10 +1,11 @@
 import { ThreeSceneBase } from "../../threescenebase";
 import { Demo3DScene } from "../3D/demo3Dscene";
-import { Editor } from "../../editor";
+import { Editor } from "../../editor/editor";
+import { FileScene } from "../3D/filescene";
 
 export class DemoPhaserScene extends Phaser.Scene {
-  scene3D!: ThreeSceneBase;
-  editor!: Editor;
+  scene3D?: ThreeSceneBase;
+  editor?: Editor;
   constructor() {
     super({ key: "DemoScene" });
   }
@@ -14,23 +15,23 @@ export class DemoPhaserScene extends Phaser.Scene {
   }
 
   async create() { 
-    this.scene3D = new Demo3DScene(this);
-    // this.scene3D = new FileScene(this, "my_scene", () => {
-    //   this.scene3D.log("FileScene loaded and ready.");
+    // this.scene3D = new Demo3DScene(this);
+    this.scene3D = new FileScene(this, "default_scene", () => {
+      this.scene3D?.log("FileScene loaded and ready.");
 
-    //   // Example of retrieving an object by name after the scene has loaded
-    //   const obj = this.scene3D.findEntityByName("GroundBox");
-    //   console.log("Retrieved object:", obj);
+      // Example of retrieving an object by name after the scene has loaded
+      const obj = this.scene3D?.findEntityByName("GroundBox");
+      console.log("Retrieved object:", obj);
 
-    //   this.scene3D.loadSounds(["button_hover", "button_click"]);
+      // this.scene3D?.loadSounds(["button_hover", "button_click"]);
 
-    //   this.input.on("pointerdown", () => {
-    //     // this.scene3D.playSound3D("button_click", obj!.getObject3D());
-    //     // createComponent<AudioComponent>(obj!, { name: "AudioComp1", compType: "AudioComp", audioKey: "button_click" }).playAudioOnce();
-    //   });
+      // this.input.on("pointerdown", () => {
+      //   // this.scene3D.playSound3D("button_click", obj!.getObject3D());
+      //   // createComponent<AudioComponent>(obj!, { name: "AudioComp1", compType: "AudioComp", audioKey: "button_click" }).playAudioOnce();
+      // });
 
-    //   this.scene3D.setPaused(false);
-    // });
+      // this.scene3D?.setPaused(false);
+    });
     this.editor = new Editor(this, this.scene3D);
 
     // Example of using the web worker.
@@ -61,6 +62,6 @@ export class DemoPhaserScene extends Phaser.Scene {
 
   update(time: number, delta: number): void {
     const dt = delta / 1000;
-    this.scene3D.update({ time: time, deltaTime: dt });
+    this.scene3D?.update({ time: time, deltaTime: dt });
   }
 }

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { AudioManager } from "./audio";
 import { CollisionManager } from "./collision";
-import { GameplayTag, Tween, UpdateArgs, ThreeSceneState, XY, CollisionCallback, UserProfile, WebWorkerPayload, WebWorkerResponse } from "./types";
+import { GameplayTag, Tween, UpdateArgs, ThreeSceneState, XY, CollisionCallback, UserProfile, WebWorkerPayload, WebWorkerResponse, XYZ } from "./types";
 import { Entity } from "./entity";
 import { MultiplayerManager } from "./multiplayer";
 import { Physics, CharacterController, PhysicsCollisionData } from "./physics";
@@ -72,8 +72,10 @@ export interface ThreeScene {
   setOutlineSelectedObjects(name: string, selectedObjects: THREE.Object3D[]): void;
 
   // Weather management
-  setTimeOfDay(timeOfDay: number): void;
   getTimeOfDay(): number;
+  setTimeOfDay(timeOfDay: number): void;
+  getFogDensity(): number;
+  setFogDensity(density: number): void;
 
   // Audio management
   loadSounds(keys: string[], loop?: boolean, volume?: number): void;
@@ -104,9 +106,17 @@ export interface ThreeScene {
   getEntityFromColliderHandle(handle: number): Entity | undefined;
   entityCollision(entityA: Entity, entityB: Entity, started: boolean): void;
   setBodyCollisionData(entity: Entity, data: PhysicsCollisionData): void;
+  setGravity(gravity: XYZ): void;
 
   // WebWorker management
   createWebWorker(taskName: string, workerUrl?: string): WebWorkerHandle;
   runWebWorkerTask(handle: WebWorkerHandle, payload: WebWorkerPayload, callback: (response: WebWorkerResponse) => void): void;
   asyncRunWebWorkerTask(handle: WebWorkerHandle, payload: WebWorkerPayload): Promise<WebWorkerResponse>;
+
+  // Speech management
+  startSpeechRecognition(): void;
+  stopSpeechRecognition(): void;
+  speak(text: string): void;
+  getSpeechTranscriptHistory(): string[];
+  getRecentSpeechTranscript(): string;
 }

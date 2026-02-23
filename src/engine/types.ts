@@ -5,6 +5,7 @@ import { RigidBody } from '@dimforge/rapier3d-compat';
 import { Collider } from '@dimforge/rapier3d-compat';
 import { PhysicsBodyData } from './physics';
 import { Entity } from './entity';
+import { SpeechState } from './speech';
 
 /** Base URL for asset loading */
 export const BASE_URL = import.meta.env.BASE_URL || "./";
@@ -58,6 +59,7 @@ export interface XYZ {
 export interface Transform {
   position: THREE.Vector3;
   quaternion: THREE.Quaternion;
+  rotation: THREE.Euler;
   scale: THREE.Vector3;
 }
 
@@ -70,12 +72,12 @@ export interface MaterialData {
   emissiveIntensity?: number;
   opacity?: number;
   transparent?: boolean;
+  wireframe?: boolean;
   depthWrite?: boolean;
   map?: THREE.Texture;
   normalMap?: THREE.Texture;
   roughnessMap?: THREE.Texture;
   metalnessMap?: THREE.Texture;
-  wireframe?: boolean;
   [key: string]: any; // Allow additional material properties
 }
 
@@ -140,6 +142,7 @@ export interface PhysicsState {
 export interface WeatherState {
   enabled: boolean;
   timeOfDay: number;
+  fogDensity: number;
 }
 
 /** Game scene state interface for saving/loading */
@@ -147,8 +150,9 @@ export interface ThreeSceneState {
   paused: boolean;
   weather: WeatherState;
   camera: CameraState;
-  entities: EntityState[];
   physics: PhysicsState;
+  speech: SpeechState;
+  entities: EntityState[];
 }
 
 /** Options for creating a game scene */

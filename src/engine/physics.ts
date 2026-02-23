@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import * as RAPIER from "@dimforge/rapier3d";
 import { RapierHelper } from "three/addons/helpers/RapierHelper.js";
-import { PhysicsState, Transform, UpdateArgs } from "./types";
+import { PhysicsState, Transform, UpdateArgs, XYZ } from "./types";
 import { ThreeSceneBase } from "./threescenebase";
 import { Entity } from "./entity";
 
@@ -159,16 +159,26 @@ export class Physics {
 
   private physicsState: PhysicsState;
   private entityBodyHandles = new Map<Entity, number[]>();
+  private defaultGravity = { x: 0, y: -9.81, z: 0 };
 
   constructor(threeScene: ThreeSceneBase, physicsState: PhysicsState) {
     this.physicsState = physicsState;
     this.threeScene = threeScene;
     this.world = new RAPIER.World(
-      physicsState.gravity || { x: 0, y: -9.81, z: 0 },
+      physicsState.gravity || this.defaultGravity,
     );
     this.eventQueue = new RAPIER.EventQueue(true);
     this.createHelper(this.physicsState);
     console.log("Physics system initialized:", this.physicsState.enabled);
+  }
+
+  setGravity(gravity: XYZ) {
+    this.physicsState.gravity = gravity;
+    this.world.gravity = gravity;
+  }
+
+  getGravity(): XYZ {
+    return this.physicsState.gravity || this.defaultGravity;
   }
 
   createHelper(physicsState: PhysicsState) {
@@ -576,6 +586,7 @@ export class Physics {
         const rotation = physicsBodyData.body.rotation();
         mesh.position.set(position.x, position.y, position.z);
         mesh.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+        mesh.updateMatrixWorld();
       }
     }
   }
@@ -597,6 +608,7 @@ export class Physics {
 
   loadState(state: PhysicsState) {
     this.setEnabled(state.enabled, state.helper);
+    this.setGravity(state.gravity || this.defaultGravity);
     this.physicsState = state;
   }
 }

@@ -7,14 +7,14 @@ import {
   GameplayTags,
 } from "../../types";
 import { EntityComponentBase } from "../../entitycompbase";
-import { createEntity, EntityTypes } from "../../entityfactory";
+import { createEntity, EntityType } from "../../entityfactory";
 import { RigidBody } from "../../physics";
 import { Entity } from "../../entity";
 
 /** A basic implementation of an entity component */
 export class LauncherComponent extends EntityComponentBase {
   private launchForce: number = 10;
-  private projectile: EntityTypes = "Box";
+  private projectile: EntityType = "Box";
   private cooldown: number = 1000; // milliseconds
   private lastLaunchTime: number = 0;
   private canLaunch: boolean = true;

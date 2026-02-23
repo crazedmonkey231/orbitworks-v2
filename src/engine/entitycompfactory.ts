@@ -1,3 +1,5 @@
+import { Entity } from './entity';
+import { EntityComponent } from './entitycomp';
 import { EntityComponentState } from './types';
 import { BasicEntityComponent } from "./entities/components/basiccomponent";
 import { SpotLightComponent } from './entities/components/spotlightcomponent';
@@ -6,7 +8,7 @@ import { PointLightComponent } from './entities/components/pointlightcomponent';
 import { AudioComponent } from './entities/components/audiocomponent';
 import { CharacterControllerComponent } from './entities/components/charactercontroller';
 import { SpriteComponent } from './entities/components/spritecomponent';
-import { CameraFollowComponent } from './entities/components/camerafollowcomponent';
+import { CameraComponent } from './entities/components/cameracomponent';
 import { LauncherComponent } from './entities/components/lauchercomponent';
 import { CollisionComponent } from './entities/components/collisioncomponent';
 import { AiControllerComponent } from './entities/components/aicontroller';
@@ -15,8 +17,6 @@ import { HealthComponent } from './entities/components/healthcomponent';
 import { ParticleBurstComponent } from './entities/components/particleburstcomponent';
 import { ConvergenceBurstComponent } from './entities/components/convergenceburst';
 import { AnimatedSpriteComponent } from './entities/components/animatedspritecomponent';
-import { Entity } from './entity';
-import { EntityComponent } from './entitycomp';
 
 /** EntityComponentTypeMap defines a mapping from component type strings to their corresponding component classes */
 interface EntityComponentTypeMap {
@@ -37,7 +37,7 @@ const entityComponentTypeMap: EntityComponentTypeMap = {
   AiController: AiControllerComponent,
   SpriteComp: SpriteComponent,
   AnimatedSpriteComp: AnimatedSpriteComponent,
-  CameraFollow: CameraFollowComponent,
+  CameraComp: CameraComponent,
   LauncherComp: LauncherComponent,
   CollisionComp: CollisionComponent,
   SpawnerComp: SpawnerComponent,
@@ -46,6 +46,8 @@ const entityComponentTypeMap: EntityComponentTypeMap = {
   ConvergenceBurst: ConvergenceBurstComponent
 };
 
+export type ComponentType = keyof typeof entityComponentTypeMap;
+export const componentTypes = Object.keys(entityComponentTypeMap) as ComponentType[];
 
 export function createComponent<T extends EntityComponent>(entity: Entity, state: EntityComponentState): T | undefined {
   const ComponentClass = entityComponentTypeMap[state.compType];

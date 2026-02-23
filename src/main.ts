@@ -1,5 +1,6 @@
 import * as Phaser from "phaser";
 import { DemoPhaserScene } from "./engine/scenes/phaser/demophaserscene";
+import { test } from "./engine/sandbox/test"
 
 /** Initialize Phaser game with 3D scene */
 const phaserGame = new Phaser.Game({
@@ -31,3 +32,10 @@ phaserGame.scale.on("resize", () => {
   // but this hook is handy if you add UI layout code later.
   console.log("Phaser scale resize event");
 });
+
+
+function sandboxTest() {
+  test();
+}
+
+sandboxTest();

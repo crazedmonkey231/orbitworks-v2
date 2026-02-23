@@ -3,7 +3,7 @@ import { CollisionCallback, UpdateArgs } from "./types";
 import { Entity } from "./entity";
 
 /** 
- * Collision manager to handle collision detection and response.
+ * Non-Physics based Collision manager to handle collision detection and response.
  * Uses simple AABB collision detection for rough collisions, and allows registering custom collision handlers for more specific collisions between entities.
  */
 export class CollisionManager {

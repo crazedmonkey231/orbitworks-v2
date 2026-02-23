@@ -17,7 +17,7 @@ interface EntityTypeMap {
   ) => Entity;
 }
 
-/** 
+/**
  * A mapping of entity types to their corresponding classes.
  * Add more as needed
  */
@@ -31,9 +31,15 @@ const entityTypeMap: EntityTypeMap = {
   Model: ModelEntity,
 };
 
-export type EntityTypes = keyof typeof entityTypeMap;
+export type EntityType = keyof typeof entityTypeMap;
+export const entityTypes: EntityType[] = Object.keys(
+  entityTypeMap,
+) as EntityType[];
 
-export function createEntity<T extends Entity>(scene: ThreeSceneBase, config: EntityState): T {
+export function createEntity<T extends Entity>(
+  scene: ThreeSceneBase,
+  config: EntityState,
+): T {
   const EntityClass = entityTypeMap[config.entityType];
   if (!EntityClass) {
     throw new Error(`Entity type ${config.entityType} not found.`);
@@ -45,7 +51,9 @@ export function createEntities(
   scene: ThreeSceneBase,
   configs: EntityState[],
 ): Entity[] {
-  return configs.map((config) => createEntity(scene, config)).filter((entity): entity is Entity => entity !== undefined);
+  return configs
+    .map((config) => createEntity(scene, config))
+    .filter((entity): entity is Entity => entity !== undefined);
 }
 
 export function createAddEntities(
@@ -99,7 +107,10 @@ export function duplicateEntities(
   return entities.map((entity) => duplicateEntity(scene, entity));
 }
 
-export function duplicateAddEntities(scene: ThreeSceneBase, entities: Entity[]): void {
+export function duplicateAddEntities(
+  scene: ThreeSceneBase,
+  entities: Entity[],
+): void {
   const duplicatedEntities = duplicateEntities(scene, entities);
   duplicatedEntities.forEach((entity) => scene.addEntity(entity, true));
 }

@@ -39,6 +39,7 @@ export class Demo3DScene extends ThreeSceneBase {
         },
         transform: {
           position: new THREE.Vector3(0, -0.5, 0),
+          rotation: new THREE.Euler(),
           quaternion: new THREE.Quaternion(),
           scale: new THREE.Vector3(1, 1, 1),
         },
@@ -77,6 +78,7 @@ export class Demo3DScene extends ThreeSceneBase {
           },
           transform: {
             position: new THREE.Vector3((Math.random() - 0.5) * 2, 5 + i * 2, (Math.random() - 0.5) * 2),
+            rotation: new THREE.Euler(),
             quaternion: new THREE.Quaternion(),
             scale: new THREE.Vector3(1, 1, 1),
           },

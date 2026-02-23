@@ -10,6 +10,7 @@ import {
   WebWorkerPayload,
   CollisionCallback,
   XY,
+  XYZ,
 } from "./types";
 import { renderer, resizeThree } from "./renderer";
 import { PostProcess } from "./postprocess";
@@ -19,10 +20,11 @@ import { CollisionManager } from "./collision";
 import { MultiplayerManager } from "./multiplayer";
 import { CharacterController, Physics, PhysicsCollisionData } from "./physics";
 import { WebWorkerHandle, WebWorkerManager } from "./webworker";
-import { LevelPath } from "./paths";
+import { ScenesPath } from "./paths";
 import { createAddEntities } from "./entityfactory";
 import { ThreeScene } from "./threescene";
 import { Entity } from "./entity";
+import { SpeechManager } from "./speech";
 
 /**
  * ThreeSceneBase is an abstract base class for game scenes that use Three.js for rendering.
@@ -52,6 +54,8 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
   private multiplayer: MultiplayerManager;
   private physics: Physics;
   private webWorker: WebWorkerManager;
+  private speech: SpeechManager;
+
   private raycaster: THREE.Raycaster;
   private tmpVec2: THREE.Vector2 = new THREE.Vector2();
 
@@ -78,6 +82,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
       options?.physicsState ?? { enabled: true, helper: false },
     );
     this.webWorker = new WebWorkerManager();
+    this.speech = new SpeechManager();
     this.raycaster = new THREE.Raycaster();
 
     // Handle window resize
@@ -108,6 +113,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     this.entities.add(entity);
     this.add(entity.getObject3D());
     entity.setScene(this);
+    // this.log(`Added entity: ${entity.getName()} (Type: ${entity.getEntityType()})`);
     if (isPhysicsObject) {
       this.addPhysicsObject(entity);
     }
@@ -118,6 +124,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
       this.remove(entity.getObject3D());
       this.removePhysicsObject(entity);
       this.entities.delete(entity);
+      // this.log(`Removed entity: ${entity.getName()} (Type: ${entity.getEntityType()})`);
       if (kill) {
         entity.kill();
       }
@@ -233,6 +240,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
 
   togglePause(): void {
     this.paused = !this.paused;
+    this.log(`Scene ${this.paused ? "paused" : "resumed"}`);
   }
 
   /** Optional method for logic that should run before the main update loop, such as input handling or pre-update calculations */
@@ -253,11 +261,11 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
       this.audio.update(args);
       for (const entity of this.entities) {
         this.physics.syncEntity(entity);
-        if (entity.getObject3D().position.y < this.killY) {
+        entity.update(args);
+        if (entity.getWorldTransform().position.y < this.killY) {
           this.removeEntity(entity);
           continue;
         }
-        entity.update(args);
       }
       this.onUpdate(args);
       this.postUpdate?.(args);
@@ -298,11 +306,13 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
         transform: {
           position: this.camera.position.clone(),
           quaternion: this.camera.quaternion.clone(),
+          rotation: new THREE.Euler().setFromQuaternion(this.camera.quaternion),
           scale: this.camera.scale.clone(),
         },
       },
       weather: this.weather.saveState(),
       physics: this.physics.saveState(),
+      speech: this.speech.saveState(),
       entities: Array.from(this.entities).map((entity) => entity.saveState()),
     };
     return state;
@@ -314,10 +324,8 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
         this.removeEntity(entity);
       }
     }
-
     // Load paused state
     this.paused = state.paused;
-
     // Load camera state
     const cameraState = state.camera;
     this.camera.fov = cameraState.fov;
@@ -325,27 +333,53 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     this.camera.far = cameraState.far;
     this.camera.position.copy(cameraState.transform.position);
     this.camera.quaternion.copy(cameraState.transform.quaternion);
+    this.camera.rotation.copy(cameraState.transform.rotation);
     this.camera.scale.copy(cameraState.transform.scale);
     this.camera.updateProjectionMatrix();
-
     // Load weather state
     this.weather.loadState(state.weather);
-
     // Load entities
     createAddEntities(this, state.entities);
-
     // Load physics state
     this.physics.loadState(state.physics);
+    // Load speech state
+    this.speech.loadState(state.speech);
   }
 
   async loadSceneFromFile(filename: string, onLoaded?: () => void): Promise<void> {
-    const filePath = `${LevelPath(filename)}.json`;
+    const filePath = `${ScenesPath(filename)}.json`;
     const response = await fetch(filePath);
     const json = await response.json();
     const jsonObj = typeof json === "string" ? JSON.parse(json) : json;
+    // Entity pre-processing
+    for (const entity of jsonObj.entities) {
+      if (entity.userData?.transform) {
+        entity.userData.transform.position = new THREE.Vector3(
+          entity.userData.transform.position.x,
+          entity.userData.transform.position.y,
+          entity.userData.transform.position.z,
+        );
+        entity.userData.transform.rotation = new THREE.Euler(
+          entity.userData.transform.rotation._x,
+          entity.userData.transform.rotation._y,
+          entity.userData.transform.rotation._z,
+        );
+        entity.userData.transform.quaternion = new THREE.Quaternion(
+          entity.userData.transform.quaternion._x,
+          entity.userData.transform.quaternion._y,
+          entity.userData.transform.quaternion._z,
+          entity.userData.transform.quaternion._w,
+        );
+        entity.userData.transform.scale = new THREE.Vector3(
+          entity.userData.transform.scale.x,
+          entity.userData.transform.scale.y,
+          entity.userData.transform.scale.z,
+        );
+      }
+    }
     this.loadSceneState(jsonObj);
     if (onLoaded) onLoaded();
-    console.log(`Loaded scene from ${filePath}`);
+    this.log(`Loaded scene from ${filePath}`);
   }
 
   async saveSceneToFile(filename: string): Promise<void> {
@@ -358,7 +392,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     a.download = `${filename}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    console.log(`Saved scene to ${filename}.json`);
+    this.log(`Saved scene to ${filename}.json`);
   }
 
   // Camera management
@@ -402,12 +436,20 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
 
   // Weather management
 
+  getTimeOfDay(): number {
+    return this.weather.getTimeOfDay();
+  }
+
   setTimeOfDay(timeOfDay: number): void {
     this.weather.setTimeOfDay(timeOfDay);
   }
 
-  getTimeOfDay(): number {
-    return this.weather.getTimeOfDay();
+  getFogDensity(): number {
+    return this.weather.getFogDensity();
+  }
+
+  setFogDensity(density: number): void {
+    this.weather.setFogDensity(density);
   }
 
   // Audio management
@@ -516,6 +558,10 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     this.physics.setBodyCollisionData(entity, data);
   }
 
+  setGravity(gravity: XYZ): void {
+    this.physics.setGravity(gravity);
+  }
+
   // WebWorker management
 
   createWebWorker(taskName: string, workerUrl?: string): WebWorkerHandle {
@@ -542,5 +588,27 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     payload: WebWorkerPayload,
   ): Promise<WebWorkerResponse> {
     return await handle.run<WebWorkerPayload, WebWorkerResponse>(payload);
+  }
+
+  // Speech management
+
+  startSpeechRecognition(): void {
+    this.speech.startRecognition();
+  }
+
+  stopSpeechRecognition(): void {
+    this.speech.stopRecognition();
+  }
+
+  speak(text: string): void {
+    this.speech.speak(text);
+  }
+
+  getSpeechTranscriptHistory(): string[] {
+    return this.speech.getTranscriptHistory();
+  }
+
+  getRecentSpeechTranscript(): string {
+    return this.speech.getRecentTranscript();
   }
 }

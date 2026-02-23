@@ -10,11 +10,11 @@ export class WeatherManager {
   private name: string = "WeatherManager";
   private threeScene: THREE.Scene;
   private timeofDay: number = 10; // 0-24
-  private sky: Sky | null = null;
-  private directionalLight: THREE.DirectionalLight | null = null;
-  private ambientLight: THREE.AmbientLight | null = null;
-  private hemisphericLight: THREE.HemisphereLight | null = null;
-  private fog: THREE.FogExp2 | null = null;
+  private sky: Sky;
+  private directionalLight: THREE.DirectionalLight;
+  private ambientLight: THREE.AmbientLight;
+  private hemisphericLight: THREE.HemisphereLight;
+  private fog: THREE.FogExp2;
   private sunPosition: THREE.Vector3 = new THREE.Vector3();
   private enabled: boolean = false;
   private lastUpdate: number = 0;
@@ -44,8 +44,7 @@ export class WeatherManager {
     this.hemisphericLight = new THREE.HemisphereLight(0xffffff, 0.5);
     this.hemisphericLight.position.set(0, 25, 0);
 
-    // this.fog = new THREE.FogExp2(0xcce0ff, 0.0001);
-    this.fog = new THREE.FogExp2(0x777777, 0.025);
+    this.fog = new THREE.FogExp2(0x777777, 0.0025);
     
     this.threeScene.add(this.sky);
     this.threeScene.add(this.directionalLight);
@@ -92,6 +91,16 @@ export class WeatherManager {
     return this.timeofDay;
   }
 
+  setFogDensity(density: number) {
+    if (this.fog) {
+      this.fog.density = density;
+    }
+  }
+
+  getFogDensity(): number {
+    return this.fog ? this.fog.density : 0;
+  }
+
   private calculateSunPosition() {
     const dayLength = this.dayTime - this.nightTime;
     const totalNightLength = 24 - dayLength;
@@ -119,13 +128,13 @@ export class WeatherManager {
     renderer.toneMappingExposure = Math.max(0.1, this.sunPosition.y * 0.3);
     if (this.sky) this.sky.material.needsUpdate = true;
 
-    this.directionalLight?.position.copy(this.sunPosition.clone().multiplyScalar(100));
-    this.directionalLight?.lookAt(new THREE.Vector3(0, 0, 0));
-    this.directionalLight?.updateMatrixWorld();
-    this.directionalLight!.intensity = Math.max(0.1, this.sunPosition.y * 0.5 + 0.5);
+    this.directionalLight.position.copy(this.sunPosition.clone().multiplyScalar(100));
+    this.directionalLight.lookAt(new THREE.Vector3(0, 0, 0));
+    this.directionalLight.updateMatrixWorld();
+    this.directionalLight.intensity = Math.max(0.1, this.sunPosition.y * 0.5 + 0.5);
 
-    this.ambientLight!.intensity = Math.max(0.1, this.sunPosition.y * 0.5 + 0.5);
-    this.hemisphericLight!.intensity = Math.max(0.1, this.sunPosition.y * 0.5 + 0.5);
+    this.ambientLight.intensity = Math.max(0.1, this.sunPosition.y * 0.5 + 0.5);
+    this.hemisphericLight.intensity = Math.max(0.1, this.sunPosition.y * 0.5 + 0.5);
   }
 
   update(args: UpdateArgs) {
@@ -155,11 +164,11 @@ export class WeatherManager {
   }
 
   private disposeResources() {
-    this.sky!.material.dispose();
-    this.sky!.geometry.dispose();
-    this.directionalLight?.dispose();
-    this.ambientLight?.dispose();
-    this.hemisphericLight?.dispose();
+    this.sky.material.dispose();
+    this.sky.geometry.dispose();
+    this.directionalLight.dispose();
+    this.ambientLight.dispose();
+    this.hemisphericLight.dispose();
   }
 
   dispose() {
@@ -170,8 +179,8 @@ export class WeatherManager {
     this.directionalLight = null as any;
     this.ambientLight = null as any;
     this.hemisphericLight = null as any;
-    this.fog = null;
-    this.threeScene.fog = null;
+    this.fog = null as any;
+    this.threeScene.fog = null as any;
     this.threeScene = null as any;
   }
 
@@ -180,16 +189,14 @@ export class WeatherManager {
     return {
       enabled: this.enabled,
       timeOfDay: this.timeofDay,
+      fogDensity: this.fog ? this.fog.density : 0,
     };
   }
 
   /** Loads the weather state from a JSON object. */
-  loadState(state: any): void {
-    if (state.timeOfDay !== undefined) {
-      this.setTimeOfDay(state.timeOfDay, true);
-    }
-    if (state.enabled !== undefined) {
-      this.setEnabled(state.enabled);
-    }
+  loadState(state: WeatherState): void {
+    this.setTimeOfDay(state.timeOfDay || 12, true);
+    this.setEnabled(state.enabled || false);
+    this.setFogDensity(state.fogDensity || 0.0025);
   }
 }
