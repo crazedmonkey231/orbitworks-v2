@@ -9,7 +9,7 @@ import {
   Transform,
   UpdateArgs,
   UserData,
-} from "./types.js";
+} from "./shared.js";
 import { ThreeSceneBase } from "./threescenebase.js";
 import { createComponentsFromStates } from "./entitycompfactory.js";
 import { PhysicsBodyData } from "./physics.js";
@@ -35,6 +35,8 @@ export abstract class EntityBase implements Entity {
   private worldScale: THREE.Vector3 = new THREE.Vector3();
   private worldQuaternion: THREE.Quaternion = new THREE.Quaternion();
   private rotation: THREE.Euler = new THREE.Euler();
+  private bounds: THREE.Box3 = new THREE.Box3();
+
   constructor(threeScene: ThreeSceneBase, entityState: EntityState) {
     this.setScene(threeScene);
     this.object3D = this.createObject3D(entityState);
@@ -191,6 +193,11 @@ export abstract class EntityBase implements Entity {
       }
     }
     return [];
+  }
+
+  getBounds(): THREE.Box3 {
+    this.bounds.setFromObject(this.object3D);
+    return this.bounds;
   }
 
   // Tag management

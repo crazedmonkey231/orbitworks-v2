@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EntityComponentState, Transform, UpdateArgs } from "../../types";
+import { EntityComponentState, Transform, UpdateArgs } from "../../shared";
 import { EntityComponentBase } from "../../entitycompbase";
 import { Entity } from "../../entity";
 

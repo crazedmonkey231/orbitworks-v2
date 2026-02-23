@@ -42,6 +42,13 @@ export const GameplayTags = {
   Environment: 'environment',
 } as const;
 
+export const UP_AXIS = new THREE.Vector3(0, 1, 0);
+export const DOWN_AXIS = new THREE.Vector3(0, -1, 0);
+export const LEFT_AXIS = new THREE.Vector3(-1, 0, 0);
+export const RIGHT_AXIS = new THREE.Vector3(1, 0, 0);
+export const FORWARD_AXIS = new THREE.Vector3(0, 0, -1);
+export const BACKWARD_AXIS = new THREE.Vector3(0, 0, 1);
+
 /** Type representing a 2D vector with x, y components */
 export interface XY {
   x: number;

@@ -1,5 +1,5 @@
 // Scene shader for posterization effect, reducing color depth and applying gamma correction for a stylized look.
-import { Shader } from "../types";
+import { Shader } from "../shared";
 
 /** Posterize Scene Shader with adjustable color levels and gamma correction */
 export const PosterizeShader: Shader = {

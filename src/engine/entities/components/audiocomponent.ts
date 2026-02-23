@@ -1,4 +1,4 @@
-import { EntityComponentState, UpdateArgs } from "../../types";
+import { EntityComponentState, UpdateArgs } from "../../shared";
 import { EntityComponentBase } from "../../entitycompbase";
 import { Entity } from "../../entity";
 

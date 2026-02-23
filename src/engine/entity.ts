@@ -8,7 +8,7 @@ import {
   MaterialData,
   UpdateArgs,
   EntityState,
-} from "./types";
+} from "./shared";
 import { PhysicsBodyData } from "./physics";
 import { ThreeSceneBase } from "./threescenebase";
 import { EntityComponent } from "./entitycomp";
@@ -45,6 +45,7 @@ export interface Entity {
   getTransform(): Transform;
   getWorldTransform(): Transform;
   getColliderHandle(): number[];
+  getBounds(): THREE.Box3;
 
   // Tag management
   addTag(tag: string): void;

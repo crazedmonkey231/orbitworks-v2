@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { CollisionCallback, UpdateArgs } from "./types";
+import { CollisionCallback, UpdateArgs } from "./shared";
 import { Entity } from "./entity";
 
 /** 

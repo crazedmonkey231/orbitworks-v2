@@ -19,6 +19,8 @@ const phaserGame = new Phaser.Game({
     width: "100%",
     height: "100%"
   },
+  antialias: true,
+  roundPixels: true,
   dom: {
     createContainer: true
   },

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { ThreeSceneBase } from "../../threescenebase";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { UpdateArgs } from '../../types';
+import { UpdateArgs } from '../../shared';
 
 /** 
  * A scene that loads its state from a file. 

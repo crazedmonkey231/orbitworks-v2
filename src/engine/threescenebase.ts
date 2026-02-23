@@ -11,7 +11,7 @@ import {
   CollisionCallback,
   XY,
   XYZ,
-} from "./types";
+} from "./shared";
 import { renderer, resizeThree } from "./renderer";
 import { PostProcess } from "./postprocess";
 import { WeatherManager } from "./weather";

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { ThreeSceneBase } from "../threescenebase";
-import { EntityState, XY, ThreeSceneState } from "../types";
+import { EntityState, XY, ThreeSceneState, DOWN_AXIS } from "../shared";
 import {
   TransformControls,
   TransformControlsMode,
@@ -16,9 +16,6 @@ export interface EntitySelection {
   entity: Entity;
   state: EntityState;
 }
-
-const propertiesPanelPosition: () => XY = () => ({ x: window.innerWidth - 290, y: 175 });
-const scenePropsPanelPosition: () => XY = () => ({ x: window.innerWidth - 290, y: 40 });
 
 /**
  * Editor class for editing 3D scenes and using phaser for the UI
@@ -37,6 +34,7 @@ export class Editor {
   private gizmo: THREE.Object3D | null = null;
   private toggleGizmo: boolean = true;
   private toggleText: Phaser.GameObjects.Text | null = null;
+  private raycaster: THREE.Raycaster = new THREE.Raycaster();
 
   constructor(phaserScene: Phaser.Scene, threeScene: ThreeSceneBase) {
     this.phaserScene = phaserScene;
@@ -89,10 +87,19 @@ export class Editor {
     this.sceneName = name;
   }
 
+  getMenuPosition(): XY {
+    const x = window.innerWidth - 290;
+    const y = 40;
+    if (this.sceneProperties) {
+      return { x, y: this.sceneProperties.getBounds().bottom + 10 };
+    }
+    return { x, y };
+  }
+
   resize(): void {
     this.refreshTopToolbar();
-    this.refreshPropertiesPanel(propertiesPanelPosition());
-    this.refreshScenePropertiesPanel(scenePropsPanelPosition());
+    this.refreshScenePropertiesPanel(this.getMenuPosition());
+    this.refreshPropertiesPanel(this.getMenuPosition());
     this.refreshInfoText();
   }
 
@@ -158,7 +165,7 @@ export class Editor {
     this.transformControls.addEventListener("objectChange", () => {
       if (this.selected && this.selected.entity) {
         this.selected.state = this.selected.entity.saveState();
-        this.refreshPropertiesPanel(propertiesPanelPosition());
+        this.refreshPropertiesPanel(this.getMenuPosition());
       }
     });
 
@@ -235,6 +242,28 @@ export class Editor {
         this.queueSceneStateChange();
       }
     });
+
+    this.phaserScene.input.keyboard?.on("keydown-END", () => {
+      if (this.selected && this.selected.entity) {
+        // Snap to raycast hit point
+        const origin = new THREE.Vector3();
+        origin.setFromMatrixPosition(this.selected.entity.getObject3D().matrixWorld);
+        this.raycaster.set(origin, DOWN_AXIS);
+        const intersects = this.raycaster.intersectObjects(this.threeScene.children, true).filter(
+          (intersect) => intersect.object.userData.entity && intersect.object.userData.entity !== this.selected?.entity
+        );
+        if (intersects.length > 0) {
+          const point: THREE.Vector3 = intersects[0].point;
+          point.y += (this.selected.entity.getBounds().max.y - this.selected.entity.getBounds().min.y) / 2;
+          this.selected.entity.setTransform({
+            ...this.selected.entity.getTransform(),
+            position: point,
+          });
+          this.selected.state = this.selected.entity.saveState();
+          this.refreshPropertiesPanel(this.getMenuPosition());
+        }
+      }
+    });
   }
 
   isInMenu(pointer: Phaser.Input.Pointer): boolean {
@@ -273,7 +302,7 @@ export class Editor {
     this.transformControls.attach(object3D);
     this.gizmo = this.transformControls.getHelper();
     this.threeScene.add(this.gizmo);
-    this.refreshPropertiesPanel(propertiesPanelPosition());
+    this.refreshPropertiesPanel(this.getMenuPosition());
   }
 
   selectObject(obj: THREE.Intersection): void {
@@ -306,7 +335,7 @@ export class Editor {
 
   loadScene(): void {
     this.deselectObject();
-    this.refreshPropertiesPanel();
+    this.toggleScenePropertiesPanel();
     this.threeScene.loadSceneFromFile(this.sceneName).then(() => {
       this.queueSceneStateChange();
       this.resize();
@@ -444,7 +473,10 @@ export class Editor {
       this.sceneProperties.destroy(true);
       this.sceneProperties = undefined;
     } else {
-      this.refreshScenePropertiesPanel(scenePropsPanelPosition());
+      this.refreshScenePropertiesPanel(this.getMenuPosition());
+    }
+    if (this.propertiesPanel) {
+      this.refreshPropertiesPanel(this.getMenuPosition());
     }
   }
 

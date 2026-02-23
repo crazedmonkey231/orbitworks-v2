@@ -1,4 +1,4 @@
-import { BASE_URL, EntityState } from "./types";
+import { BASE_URL, EntityState } from "./shared";
 import { BasicEntity } from "./entities/basicentity";
 import { BoxEntity } from "./entities/boxentity";
 import { SphereEntity } from "./entities/sphereentity";

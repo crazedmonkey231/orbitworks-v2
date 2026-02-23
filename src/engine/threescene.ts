@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { AudioManager } from "./audio";
 import { CollisionManager } from "./collision";
-import { GameplayTag, Tween, UpdateArgs, ThreeSceneState, XY, CollisionCallback, UserProfile, WebWorkerPayload, WebWorkerResponse, XYZ } from "./types";
+import { GameplayTag, Tween, UpdateArgs, ThreeSceneState, XY, CollisionCallback, UserProfile, WebWorkerPayload, WebWorkerResponse, XYZ } from "./shared";
 import { Entity } from "./entity";
 import { MultiplayerManager } from "./multiplayer";
 import { Physics, CharacterController, PhysicsCollisionData } from "./physics";

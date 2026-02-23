@@ -1,5 +1,5 @@
 import { Octree } from "three/examples/jsm/Addons.js";
-import { UpdateArgs, EntityComponentState, ColliderShape } from "./types";
+import { UpdateArgs, EntityComponentState, ColliderShape } from "./shared";
 import { Entity } from "./entity";
 
 /** Entity component interface */

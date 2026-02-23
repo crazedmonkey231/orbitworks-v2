@@ -1,6 +1,6 @@
 import { ThreeSceneBase } from "../../threescenebase";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { UpdateArgs } from '../../types';
+import { UpdateArgs } from '../../shared';
 
 /** 
  * A blank scene template to use as a starting point for new scenes or perfect for loading a saved scene state from a file. 

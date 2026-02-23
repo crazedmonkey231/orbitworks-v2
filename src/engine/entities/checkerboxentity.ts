@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EntityState, UpdateArgs } from '../types';
+import { EntityState, UpdateArgs } from '../shared';
 import { EntityBase } from "../entitybase";
 import { ThreeSceneBase } from "../threescenebase";
 import { createCheckerTexture } from "../utils";

@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import Phaser from 'phaser';
-import { GameplayTags, PhysicsData, XY } from '../types';
+import { GameplayTags, PhysicsData, XY } from '../shared';
 import { Editor } from './editor';
-import { getDefaultFontStyle, EditableProperty, createEditableProperty } from './editorutils';
+import { getDefaultFontStyle, EditableProperty, createEditableProperty, getDefaultBackground } from './editorutils';
 
 interface PropertiesPanelConfig {
   onChange?: () => void;
@@ -13,7 +13,7 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
   private editor: Editor;
   private config: PropertiesPanelConfig;
   private bounds: Phaser.Geom.Rectangle;
-  private size: XY = { x: 290, y: 320 };
+  private size: XY = { x: 280, y: 320 };
   constructor(editor: Editor, x: number, y: number, config: PropertiesPanelConfig = {}) {
     super(editor.getPhaserScene(), x, y);
     this.config = config;
@@ -32,11 +32,8 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
     const selected = this.editor.getSelectedEntity();
     const phaserScene = this.editor.getPhaserScene();
     if (!selected) return;
-
-    const bgd = phaserScene.add.rectangle(0, 0, this.size.x - 10, this.size.y, 0x000000, 0.1);
-    bgd.setStrokeStyle(2, 0x000000, 0.5);
-    bgd.setRounded(10);
-    bgd.setOrigin(0, 0);
+    
+    const bgd = getDefaultBackground(this.scene, this.size);
     this.add(bgd);
 
     const title = phaserScene.add.text(

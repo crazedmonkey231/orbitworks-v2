@@ -3,7 +3,7 @@ import {
   EntityState,
   GameplayTags,
   UpdateArgs,
-} from "../../types";
+} from "../../shared";
 import { EntityComponentBase } from "../../entitycompbase";
 import { Vector3 } from "three";
 import {

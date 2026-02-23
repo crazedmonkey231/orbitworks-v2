@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { ThreeSceneBase } from "../../threescenebase";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { UpdateArgs, EntityState } from '../../types';
+import { UpdateArgs, EntityState } from '../../shared';
 import { createAddEntities } from "../../entityfactory";
 
 export class Demo3DScene extends ThreeSceneBase {

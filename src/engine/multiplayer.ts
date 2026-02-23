@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { UserProfile } from "./types";
+import { UserProfile } from "./shared";
 
 /** Manages multiplayer connections and communication using Socket.IO */
 export class MultiplayerManager {

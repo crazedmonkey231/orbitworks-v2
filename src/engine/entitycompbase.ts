@@ -1,4 +1,4 @@
-import { EntityComponentState, UpdateArgs } from "./types";
+import { EntityComponentState, UpdateArgs } from "./shared";
 import { ThreeSceneBase } from "./threescenebase";
 import { EntityComponent } from "./entitycomp";
 import { Entity } from "./entity";

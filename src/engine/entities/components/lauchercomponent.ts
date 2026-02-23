@@ -5,7 +5,7 @@ import {
   GameplayTag,
   UpdateArgs,
   GameplayTags,
-} from "../../types";
+} from "../../shared";
 import { EntityComponentBase } from "../../entitycompbase";
 import { createEntity, EntityType } from "../../entityfactory";
 import { RigidBody } from "../../physics";

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import * as RAPIER from "@dimforge/rapier3d";
 import { RapierHelper } from "three/addons/helpers/RapierHelper.js";
-import { PhysicsState, Transform, UpdateArgs, XYZ } from "./types";
+import { PhysicsState, Transform, UpdateArgs, XYZ } from "./shared";
 import { ThreeSceneBase } from "./threescenebase";
 import { Entity } from "./entity";
 

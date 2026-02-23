@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EntityComponentState, UpdateArgs } from "../../types";
+import { EntityComponentState, UpdateArgs } from "../../shared";
 import { EntityComponentBase } from "../../entitycompbase";
 import { BodyTypes, CharacterController, RigidBody } from "../../physics";
 import { RaycastSensor } from "../../raycastsensor";

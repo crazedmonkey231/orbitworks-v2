@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { EntityComponentState, UpdateArgs } from "../../types";
+import { DOWN_AXIS, EntityComponentState, UP_AXIS, UpdateArgs } from "../../shared";
 import { EntityComponentBase } from "../../entitycompbase";
 import { CharacterController, BodyTypes, RigidBody } from "../../physics";
 import { Entity } from "../../entity";
@@ -17,9 +17,6 @@ const keyMap: { [key: string]: Phaser.Input.Keyboard.Key | undefined } = {
   Right: undefined,
   Space: undefined,
 };
-
-const UP_AXIS = new THREE.Vector3(0, 1, 0);
-const DOWN_AXIS = new THREE.Vector3(0, -1, 0);
 
 /** A basic implementation of an character controller component */
 export class CharacterControllerComponent extends EntityComponentBase {

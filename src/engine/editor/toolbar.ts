@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { Editor } from "./editor";
 import { getDefaultFontStyle, createEditableProperty } from "./editorutils";
-import { XY } from "../types";
+import { XY } from "../shared";
 
 interface ToolBarConfig {
   onChange?: (propertyName: string, newValue: any) => void;
@@ -82,16 +82,8 @@ export class ToolBar extends Phaser.GameObjects.Container {
   create(): void {
     const editor = this.editor;
     const phaserScene = editor.getPhaserScene();
-    const threeScene = editor.getThreeScene();
     const hudContainer = editor.getHudContainer();
     const buttonData = [
-      { label: "Toggle Physics", action: () => editor.togglePhysics() },
-      { label: "Toggle Pause", action: () => threeScene.togglePause() },
-      { label: "Cache Scene", action: () => editor.queueSceneStateChange() },
-      { label: "Save Scene", action: () => editor.saveScene() },
-      { label: "Load Scene", action: () => editor.loadScene() },
-      { label: "Undo", action: () => editor.reloadScene(true) },
-      { label: "Deselect", action: () => editor.deselectObject() },
       {
         label: "Scene Properties",
         action: () => editor.toggleScenePropertiesPanel(),
@@ -102,6 +94,7 @@ export class ToolBar extends Phaser.GameObjects.Container {
           editor.toggleEntityPicker();
         },
       },
+      { label: "Deselect", action: () => editor.deselectObject() },
     ];
     const width = window.innerWidth / buttonData.length;
     let currentX = 0;

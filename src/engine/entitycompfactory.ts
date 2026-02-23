@@ -1,6 +1,6 @@
 import { Entity } from './entity';
 import { EntityComponent } from './entitycomp';
-import { EntityComponentState } from './types';
+import { EntityComponentState } from './shared';
 import { BasicEntityComponent } from "./entities/components/basiccomponent";
 import { SpotLightComponent } from './entities/components/spotlightcomponent';
 import { ImpulseComponent } from "./entities/components/impulsecomponent";
