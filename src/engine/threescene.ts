@@ -73,7 +73,7 @@ export interface ThreeScene {
 
   // Weather management
   getTimeOfDay(): number;
-  setTimeOfDay(timeOfDay: number): void;
+  setTimeOfDay(timeOfDay: number, forceUpdate?: boolean): void;
   getFogDensity(): number;
   setFogDensity(density: number): void;
 

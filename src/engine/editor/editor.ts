@@ -98,8 +98,9 @@ export class Editor {
 
   resize(): void {
     this.refreshTopToolbar();
+    this.removeScenePropertiesPanel();
     this.refreshScenePropertiesPanel(this.getMenuPosition());
-    this.refreshPropertiesPanel(this.getMenuPosition());
+    this.refreshEntityPropertiesPanel(this.getMenuPosition());
     this.refreshInfoText();
   }
 
@@ -158,21 +159,21 @@ export class Editor {
       } else {
         this.queueSceneStateChange();
         this.reloadScene(true);
-        this.refreshPropertiesPanel();
+        this.refreshEntityPropertiesPanel();
       }
     });
 
     this.transformControls.addEventListener("objectChange", () => {
       if (this.selected && this.selected.entity) {
         this.selected.state = this.selected.entity.saveState();
-        this.refreshPropertiesPanel(this.getMenuPosition());
+        this.refreshEntityPropertiesPanel(this.getMenuPosition());
       }
     });
 
     // Key handling esc for deselect and toggle gizmo
     this.phaserScene.input.keyboard?.on("keydown-ESC", () => {
       this.deselectObject();
-      this.refreshPropertiesPanel();
+      this.refreshEntityPropertiesPanel();
       this.toggleGizmo = !this.toggleGizmo;
       this.refreshInfoText();
     });
@@ -181,7 +182,7 @@ export class Editor {
     this.phaserScene.input.keyboard?.on("keydown-Z", (event: KeyboardEvent) => {
       if (event.ctrlKey) {
         this.reloadScene(true);
-        this.refreshPropertiesPanel();
+        this.refreshEntityPropertiesPanel();
       }
     });
 
@@ -201,7 +202,7 @@ export class Editor {
         this.selected &&
         this.selected.entity
       ) {
-        this.refreshPropertiesPanel();
+        this.refreshEntityPropertiesPanel();
         const entity = this.selected.entity;
         const duplicated = duplicateEntity(this.threeScene, entity);
         this.threeScene.addEntity(duplicated);
@@ -260,7 +261,7 @@ export class Editor {
             position: point,
           });
           this.selected.state = this.selected.entity.saveState();
-          this.refreshPropertiesPanel(this.getMenuPosition());
+          this.refreshEntityPropertiesPanel(this.getMenuPosition());
         }
       }
     });
@@ -302,7 +303,7 @@ export class Editor {
     this.transformControls.attach(object3D);
     this.gizmo = this.transformControls.getHelper();
     this.threeScene.add(this.gizmo);
-    this.refreshPropertiesPanel(this.getMenuPosition());
+    this.refreshEntityPropertiesPanel(this.getMenuPosition());
   }
 
   selectObject(obj: THREE.Intersection): void {
@@ -318,7 +319,7 @@ export class Editor {
 
   deselectObject(): void {
     this.clearGizmo();
-    this.refreshPropertiesPanel();
+    this.refreshEntityPropertiesPanel();
     this.selected = null;
     this.threeScene.setOutlineSelectedObjects("selectedOutline", []);
   }
@@ -354,8 +355,10 @@ export class Editor {
     if (currentState) {
       this.deselectObject();
       this.togglePhysics(false);
+      this.removeScenePropertiesPanel();
       this.threeScene.loadSceneState(currentState);
       this.refreshInfoText();
+      this.refreshScenePropertiesPanel(this.getMenuPosition());
     }
   }
 
@@ -408,12 +411,16 @@ export class Editor {
     this.deselectObject();
   }
 
-  /** Creates the properties panel UI based on the currently selected entity */
-  refreshPropertiesPanel(position?: XY): void {
+  removeEntityPropertiesPanel() {
     if (this.propertiesPanel) {
       this.propertiesPanel.destroy(true);
       this.propertiesPanel = undefined;
     }
+  }
+
+  /** Creates the properties panel UI based on the currently selected entity */
+  refreshEntityPropertiesPanel(position?: XY): void {
+    this.removeEntityPropertiesPanel();
     if (!position) {
       return;
     }
@@ -439,11 +446,15 @@ export class Editor {
     this.hudContainer.add(this.toolBar);
   }
 
-  refreshScenePropertiesPanel(position?: XY): void {
+  removeScenePropertiesPanel() {
     if (this.sceneProperties) {
       this.sceneProperties.destroy(true);
       this.sceneProperties = undefined;
     }
+  }
+
+  refreshScenePropertiesPanel(position?: XY): void {
+    this.removeScenePropertiesPanel();
     if (!position) {
       return;
     }
@@ -457,7 +468,7 @@ export class Editor {
         },
         onEnter: () => {
           this.queueSceneStateChange();
-          this.reloadScene(true);
+          // this.reloadScene();
         }
       },
     );
@@ -472,7 +483,7 @@ export class Editor {
       this.refreshScenePropertiesPanel(this.getMenuPosition());
     }
     if (this.propertiesPanel) {
-      this.refreshPropertiesPanel(this.getMenuPosition());
+      this.refreshEntityPropertiesPanel(this.getMenuPosition());
     }
   }
 

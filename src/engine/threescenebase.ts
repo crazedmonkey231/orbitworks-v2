@@ -440,8 +440,8 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     return this.weather.getTimeOfDay();
   }
 
-  setTimeOfDay(timeOfDay: number): void {
-    this.weather.setTimeOfDay(timeOfDay);
+  setTimeOfDay(timeOfDay: number, forceUpdate?: boolean): void {
+    this.weather.setTimeOfDay(timeOfDay, forceUpdate);
   }
 
   getFogDensity(): number {

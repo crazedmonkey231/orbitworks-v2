@@ -97,7 +97,7 @@ export class ScenePropertiesPanel extends Phaser.GameObjects.Container {
         onChange: (newValue) => {
           const time = parseFloat(newValue);
           if (!isNaN(time)) {
-            threeScene.setTimeOfDay(time);
+            threeScene.setTimeOfDay(time, true);
           }
         },
       },
