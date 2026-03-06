@@ -1,12 +1,15 @@
 import * as THREE from "three";
 import { GLTFLoader, ImprovedNoise } from "three/examples/jsm/Addons.js";
 import { ModelPath, TexturePath } from "./paths";
+import { getTexture } from "./registry";
 
 /** Handy tween easing reference */
 export const tweensEasing = {
   linear: "Linear",
+  power2: "Power2",
   sineEaseInOut: "Sine.easeInOut",
   expoEaseInOut: "Expo.easeInOut",
+  expoEaseOut: "Expo.easeOut",
   circEaseInOut: "Circ.easeInOut",
   quadEaseInOut: "Quad.easeInOut",
   cubicEaseInOut: "Cubic.easeInOut",
@@ -144,6 +147,21 @@ export function loadTexture(
   });
 }
 
+export function updateMaterialTexture(
+  material: THREE.Material,
+  materialData: any,
+  textureType: "map" | "roughnessMap" | "metalnessMap" | "normalMap",
+): void {
+  if (materialData[textureType] && textureType in material) {
+    const texture = getTexture(materialData[textureType]);
+    if (texture) {
+      (material as any)[textureType] = texture;
+      material.needsUpdate = true;
+    }
+  }
+}
+
+
 /** Perlin noise height generation */
 export function generateNoise(
   x: number,
@@ -225,4 +243,69 @@ export function createCheckerTexture(repeat = 1) {
   texture.wrapT = THREE.RepeatWrapping;
 
   return texture;
+}
+
+/** Creates a rough texture */
+export function createRoughTexture(repeat = 1) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 2;
+  canvas.height = 2;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error("Failed to create canvas context");
+  }
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, 2, 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.repeat.set(repeat, repeat);
+  texture.magFilter = THREE.NearestFilter;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+
+  return texture;
+}
+
+export function roundToDecimals(value: number, decimals: number = 2): number {
+  const factor = Math.pow(10, decimals);
+  return Math.round(value * factor) / factor;
+}
+
+export function roundXYZ(x: number, y: number, z: number, decimals: number = 2): THREE.Vector3 {
+  const factor = Math.pow(10, decimals);
+  return new THREE.Vector3(
+    Math.round(x * factor) / factor,
+    Math.round(y * factor) / factor,
+    Math.round(z * factor) / factor,
+  );
+}
+
+export function roundVector3(vector: THREE.Vector3, decimals: number = 2): THREE.Vector3 {
+  const factor = Math.pow(10, decimals);
+  return new THREE.Vector3(
+    Math.round(vector.x * factor) / factor,
+    Math.round(vector.y * factor) / factor,
+    Math.round(vector.z * factor) / factor,
+  );
+}
+
+export function roundEuler(euler: THREE.Euler, decimals: number = 2): THREE.Euler {
+  const factor = Math.pow(10, decimals);
+  return new THREE.Euler(
+    Math.round(euler.x * factor) / factor,
+    Math.round(euler.y * factor) / factor,
+    Math.round(euler.z * factor) / factor,
+    euler.order,
+  );
+}
+
+export function roundQuaternion(quaternion: THREE.Quaternion, decimals: number = 2): THREE.Quaternion {
+  const factor = Math.pow(10, decimals);
+  return new THREE.Quaternion(
+    Math.round(quaternion.x * factor) / factor,
+    Math.round(quaternion.y * factor) / factor,
+    Math.round(quaternion.z * factor) / factor,
+    Math.round(quaternion.w * factor) / factor,
+  );
 }

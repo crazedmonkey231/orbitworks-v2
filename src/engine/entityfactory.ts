@@ -1,59 +1,23 @@
 import { BASE_URL, EntityState } from "./shared";
-import { BasicEntity } from "./entities/basicentity";
-import { BoxEntity } from "./entities/boxentity";
-import { SphereEntity } from "./entities/sphereentity";
 import { ThreeSceneBase } from "./threescenebase";
-import { CapsuleEntity } from "./entities/capsuleentity";
-import { RoundedBoxEntity } from "./entities/roundedboxentity";
-import { CheckerBoxEntity } from "./entities/checkerboxentity";
-import { ModelEntity } from "./entities/modelentity";
 import { Entity } from "./entity";
+import { EntityGame } from "./entitygame";
 
-/** EntityTypeMap defines a mapping from entity type strings to their corresponding entity classes */
-interface EntityTypeMap {
-  [key: string]: new (
-    threeScene: ThreeSceneBase,
-    config: EntityState,
-  ) => Entity;
-}
 
-/**
- * A mapping of entity types to their corresponding classes.
- * Add more as needed
- */
-const entityTypeMap: EntityTypeMap = {
-  Basic: BasicEntity,
-  Box: BoxEntity,
-  Sphere: SphereEntity,
-  Capsule: CapsuleEntity,
-  RoundedBox: RoundedBoxEntity,
-  CheckerBox: CheckerBoxEntity,
-  Model: ModelEntity,
-};
-
-export type EntityType = keyof typeof entityTypeMap;
-export const entityTypes: EntityType[] = Object.keys(
-  entityTypeMap,
-) as EntityType[];
-
-export function createEntity<T extends Entity>(
+export function createEntity<T extends EntityGame>(
   scene: ThreeSceneBase,
   config: EntityState,
 ): T {
-  const EntityClass = entityTypeMap[config.entityType];
-  if (!EntityClass) {
-    throw new Error(`Entity type ${config.entityType} not found.`);
-  }
-  return new EntityClass(scene, config) as T;
+  return new EntityGame(scene, config) as T;
 }
 
 export function createEntities(
   scene: ThreeSceneBase,
   configs: EntityState[],
-): Entity[] {
+): EntityGame[] {
   return configs
     .map((config) => createEntity(scene, config))
-    .filter((entity): entity is Entity => entity !== undefined);
+    .filter((entity): entity is EntityGame => entity !== undefined);
 }
 
 export function createAddEntities(
@@ -61,7 +25,7 @@ export function createAddEntities(
   configs: EntityState[],
 ): void {
   const entities = createEntities(scene, configs);
-  entities.forEach((entity) => scene.addEntity(entity, true));
+  entities.forEach((entity) => scene.addEntity(entity, entity.getUserData().isDynamic ?? true));
 }
 
 export function saveEntityState(fileName: string, entity: Entity): any {
@@ -112,5 +76,5 @@ export function duplicateAddEntities(
   entities: Entity[],
 ): void {
   const duplicatedEntities = duplicateEntities(scene, entities);
-  duplicatedEntities.forEach((entity) => scene.addEntity(entity, true));
+  duplicatedEntities.forEach((entity) => scene.addEntity(entity, entity.getUserData().isDynamic ?? true));
 }

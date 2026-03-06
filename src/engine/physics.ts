@@ -4,6 +4,7 @@ import { RapierHelper } from "three/addons/helpers/RapierHelper.js";
 import { PhysicsState, Transform, UpdateArgs, XYZ } from "./shared";
 import { ThreeSceneBase } from "./threescenebase";
 import { Entity } from "./entity";
+import { call } from "three/tsl";
 
 // Re-export RAPIER types for convenience and variables for the physics system
 
@@ -589,6 +590,16 @@ export class Physics {
         mesh.updateMatrixWorld();
       }
     }
+  }
+
+  sensorTest(collider: Collider, callback: (entityA: Entity, entityB: Entity) => void) {
+    this.world.intersectionPairsWith(collider, (otherCollider) => {
+      const entity = this.getEntityByHandle(collider.handle)
+      const otherEntity = this.getEntityByHandle(otherCollider.handle)
+      if (entity && otherEntity){
+        callback(entity, otherEntity);
+      }
+    });
   }
 
   /** Dispose of physics resources */

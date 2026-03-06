@@ -18,13 +18,47 @@ import { WeatherManager } from "./weather";
 import { AudioManager } from "./audio";
 import { CollisionManager } from "./collision";
 import { MultiplayerManager } from "./multiplayer";
-import { CharacterController, Physics, PhysicsCollisionData } from "./physics";
+import { CharacterController, Collider, Physics, PhysicsCollisionData } from "./physics";
 import { WebWorkerHandle, WebWorkerManager } from "./webworker";
 import { ScenesPath } from "./paths";
 import { createAddEntities } from "./entityfactory";
 import { ThreeScene } from "./threescene";
 import { Entity } from "./entity";
 import { SpeechManager } from "./speech";
+
+async function loadSceneFile(filename: string): Promise<ThreeSceneState> {
+    const filePath = `${ScenesPath(filename)}.json`;
+    const response = await fetch(filePath);
+    const json = await response.json();
+    const jsonObj = typeof json === "string" ? JSON.parse(json) : json;
+    // Entity pre-processing
+    for (const entity of jsonObj.entities) {
+      if (entity.userData?.transform) {
+        entity.userData.transform.position = new THREE.Vector3(
+          entity.userData.transform.position.x,
+          entity.userData.transform.position.y,
+          entity.userData.transform.position.z,
+        );
+        entity.userData.transform.rotation = new THREE.Euler(
+          entity.userData.transform.rotation._x,
+          entity.userData.transform.rotation._y,
+          entity.userData.transform.rotation._z,
+        );
+        entity.userData.transform.quaternion = new THREE.Quaternion(
+          entity.userData.transform.quaternion._x,
+          entity.userData.transform.quaternion._y,
+          entity.userData.transform.quaternion._z,
+          entity.userData.transform.quaternion._w,
+        );
+        entity.userData.transform.scale = new THREE.Vector3(
+          entity.userData.transform.scale.x,
+          entity.userData.transform.scale.y,
+          entity.userData.transform.scale.z,
+        );
+      }
+    }
+    return jsonObj as ThreeSceneState;
+}
 
 /**
  * ThreeSceneBase is an abstract base class for game scenes that use Three.js for rendering.
@@ -113,7 +147,7 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     this.entities.add(entity);
     this.add(entity.getObject3D());
     entity.setScene(this);
-    // this.log(`Added entity: ${entity.getName()} (Type: ${entity.getEntityType()})`);
+    // this.log(`Added entity: ${entity.getName()} (Type: ${entity.getEntityType()}, isPhysicsObject: ${isPhysicsObject})`);
     if (isPhysicsObject) {
       this.addPhysicsObject(entity);
     }
@@ -135,6 +169,12 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
 
   findEntityByName(name: string): Entity | undefined {
     return this.getObjectByName(name)?.userData.entity as Entity | undefined; 
+  }
+
+  findEntitiesByName(name: string): Entity[] {
+    return Array.from(this.entities).filter(
+      (entity) => entity.getName() === name,
+    );
   }
 
   findEntitiesByEntityType(entityType: string): Entity[] {
@@ -347,39 +387,10 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
   }
 
   async loadSceneFromFile(filename: string, onLoaded?: () => void): Promise<void> {
-    const filePath = `${ScenesPath(filename)}.json`;
-    const response = await fetch(filePath);
-    const json = await response.json();
-    const jsonObj = typeof json === "string" ? JSON.parse(json) : json;
-    // Entity pre-processing
-    for (const entity of jsonObj.entities) {
-      if (entity.userData?.transform) {
-        entity.userData.transform.position = new THREE.Vector3(
-          entity.userData.transform.position.x,
-          entity.userData.transform.position.y,
-          entity.userData.transform.position.z,
-        );
-        entity.userData.transform.rotation = new THREE.Euler(
-          entity.userData.transform.rotation._x,
-          entity.userData.transform.rotation._y,
-          entity.userData.transform.rotation._z,
-        );
-        entity.userData.transform.quaternion = new THREE.Quaternion(
-          entity.userData.transform.quaternion._x,
-          entity.userData.transform.quaternion._y,
-          entity.userData.transform.quaternion._z,
-          entity.userData.transform.quaternion._w,
-        );
-        entity.userData.transform.scale = new THREE.Vector3(
-          entity.userData.transform.scale.x,
-          entity.userData.transform.scale.y,
-          entity.userData.transform.scale.z,
-        );
-      }
-    }
-    this.loadSceneState(jsonObj);
+    const sceneState = await loadSceneFile(filename);
+    this.loadSceneState(sceneState);
     if (onLoaded) onLoaded();
-    this.log(`Loaded scene from ${filePath}`);
+    this.log(`Loaded scene from ${filename}`);
   }
 
   async saveSceneToFile(filename: string): Promise<void> {
@@ -393,6 +404,13 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
     a.click();
     URL.revokeObjectURL(url);
     this.log(`Saved scene to ${filename}.json`);
+  }
+
+  async importSceneFile(filename: string, onImported?: () => void): Promise<void> {
+    const sceneState = await loadSceneFile(filename);
+    createAddEntities(this, sceneState.entities);
+    if (onImported) onImported();
+    this.log(`Imported scene from ${filename}`);
   }
 
   // Camera management
@@ -560,6 +578,14 @@ export abstract class ThreeSceneBase extends THREE.Scene implements ThreeScene {
 
   setGravity(gravity: XYZ): void {
     this.physics.setGravity(gravity);
+  }
+  
+  syncPhysicsToEntity(entity: Entity): void {
+    this.physics.setEntityTransform(entity, entity.getWorldTransform());
+  }
+
+  sensorTest(collider: Collider, callback: (entityA: Entity, entityB: Entity) => void): void {
+    this.physics.sensorTest(collider, callback);
   }
 
   // WebWorker management

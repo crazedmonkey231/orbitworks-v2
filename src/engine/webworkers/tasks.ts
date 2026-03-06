@@ -13,4 +13,3 @@ registerWorkerTask("heavyComputation", (payload: WebWorkerPayload): WebWorkerRes
   }
   return { result: count };
 });
-

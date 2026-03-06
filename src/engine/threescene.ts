@@ -4,7 +4,7 @@ import { CollisionManager } from "./collision";
 import { GameplayTag, Tween, UpdateArgs, ThreeSceneState, XY, CollisionCallback, UserProfile, WebWorkerPayload, WebWorkerResponse, XYZ } from "./shared";
 import { Entity } from "./entity";
 import { MultiplayerManager } from "./multiplayer";
-import { Physics, CharacterController, PhysicsCollisionData } from "./physics";
+import { Physics, CharacterController, PhysicsCollisionData, Collider } from "./physics";
 import { PostProcess } from "./postprocess";
 import { WeatherManager } from "./weather";
 import { WebWorkerManager, WebWorkerHandle } from "./webworker";
@@ -23,6 +23,7 @@ export interface ThreeScene {
 
   // Entity querying
   findEntityByName(name: string): Entity | undefined;
+  findEntitiesByName(name: string): Entity[];
   findEntitiesByEntityType(entityType: string): Entity[];
   findEntitiesByTag(tag: string): Entity[];
   findEntitiesByGameplayTag(tag: GameplayTag): Entity[];
@@ -62,6 +63,7 @@ export interface ThreeScene {
   loadSceneState(state: ThreeSceneState): void;
   loadSceneFromFile(filename: string, onLoaded?: () => void): Promise<void>;
   saveSceneToFile(filename: string): void;
+  importSceneFile(filename: string, onImported?: () => void): Promise<void>;
 
   // Camera management
   refreshMatrixWorld(): THREE.PerspectiveCamera;
@@ -107,6 +109,8 @@ export interface ThreeScene {
   entityCollision(entityA: Entity, entityB: Entity, started: boolean): void;
   setBodyCollisionData(entity: Entity, data: PhysicsCollisionData): void;
   setGravity(gravity: XYZ): void;
+  syncPhysicsToEntity(entity: Entity): void;
+  sensorTest(collider: Collider, callback: (entityA: Entity, entityB: Entity) => void): void;
 
   // WebWorker management
   createWebWorker(taskName: string, workerUrl?: string): WebWorkerHandle;

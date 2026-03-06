@@ -5,7 +5,7 @@ import {
   TransformControls,
   TransformControlsMode,
 } from "three/examples/jsm/Addons.js";
-import { duplicateEntity } from "../entityfactory";
+import { createAddEntities, duplicateEntity } from "../entityfactory";
 import { Entity } from "../entity";
 import { PropertiesPanel } from "./propertiespanel";
 import { ToolBar } from "./toolbar";
@@ -36,9 +36,12 @@ export class Editor {
   private toggleText: Phaser.GameObjects.Text | null = null;
   private raycaster: THREE.Raycaster = new THREE.Raycaster();
 
-  constructor(phaserScene: Phaser.Scene, threeScene: ThreeSceneBase) {
+  constructor(phaserScene: Phaser.Scene, threeScene: ThreeSceneBase, sceneName?: string) {
     this.phaserScene = phaserScene;
     this.threeScene = threeScene;
+    if (sceneName) {
+      this.sceneName = sceneName;
+    }
     this.threeScene
       .getPostProcess()
       .addOutline("selectedOutline", this.threeScene, {
@@ -248,14 +251,25 @@ export class Editor {
       if (this.selected && this.selected.entity) {
         // Snap to raycast hit point
         const origin = new THREE.Vector3();
-        origin.setFromMatrixPosition(this.selected.entity.getObject3D().matrixWorld);
-        this.raycaster.set(origin, DOWN_AXIS);
-        const intersects = this.raycaster.intersectObjects(this.threeScene.children, true).filter(
-          (intersect) => intersect.object.userData.entity && intersect.object.userData.entity !== this.selected?.entity
+        origin.setFromMatrixPosition(
+          this.selected.entity.getObject3D().matrixWorld,
         );
+        this.raycaster.set(origin, DOWN_AXIS);
+        const intersects = this.raycaster
+          .intersectObjects(this.threeScene.children, true)
+          .filter(
+            (intersect) =>
+              intersect.object.userData.entity &&
+              intersect.object.userData.entity !== this.selected?.entity &&
+              intersect.object.parent !== this.selected?.entity.getObject3D()
+          );
+        console.log("Raycast intersects:", intersects);
         if (intersects.length > 0) {
           const point: THREE.Vector3 = intersects[0].point;
-          point.y += (this.selected.entity.getBounds().max.y - this.selected.entity.getBounds().min.y) / 2;
+          point.y +=
+            (this.selected.entity.getBounds().max.y -
+              this.selected.entity.getBounds().min.y) /
+            2;
           this.selected.entity.setTransform({
             ...this.selected.entity.getTransform(),
             position: point,
@@ -315,6 +329,15 @@ export class Editor {
       return;
     }
     this.selectEntity(entity);
+  }
+
+  inspectSelected(): void {
+    if (!this.selected || !this.selected.entity) {
+      return;
+    }
+    const entity = this.selected.entity;
+    console.log("Inspecting entity:", entity);
+    console.log("State:", entity.saveState());
   }
 
   deselectObject(): void {
@@ -431,6 +454,7 @@ export class Editor {
       onEnter: () => {
         this.queueSceneStateChange();
         this.reloadScene(true);
+        this.queueSceneStateChange();
       },
     });
     this.hudContainer.add(this.propertiesPanel);
@@ -468,8 +492,9 @@ export class Editor {
         },
         onEnter: () => {
           this.queueSceneStateChange();
-          // this.reloadScene();
-        }
+          this.reloadScene(true);
+          this.queueSceneStateChange();
+        },
       },
     );
     this.hudContainer.add(this.sceneProperties);
@@ -490,9 +515,35 @@ export class Editor {
   toggleEntityPicker(): void {
     // This method can be expanded to show a UI for picking entities to add to the scene.
     // For now, it just creates a new entity at the origin and selects it.
-  //   const newEntity = this.threeScene.createEntity(`Entity_${Date.now()}`);
-  //   newEntity.setPosition(0, 0, 0);
-  //   this.threeScene.addEntity(newEntity);
-  //   this.selectEntity(newEntity);
+    const boxData: EntityState | any = {
+      name: `Entity${Math.floor(Math.random() * 1000)}`,
+      entityType: "RoundedBox",
+      components: [],
+      userData: {
+        radius: 0.075,
+        segments: 5,
+        width: 1,
+        height: 1,
+        depth: 1,
+        material: {
+          color: 0x008bff,
+          metalness: 0.25,
+          roughness: 0.25,
+        },
+        physicsData: {
+          mass: 100,
+          friction: 0.5,
+          density: 1,
+          restitution: 0.001,
+        },
+        transform: {
+          position: new THREE.Vector3(0, 1, 0),
+          rotation: new THREE.Euler(),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+      },
+    };
+    createAddEntities(this.threeScene, [boxData]);
   }
 }

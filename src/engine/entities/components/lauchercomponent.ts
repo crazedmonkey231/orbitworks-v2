@@ -31,7 +31,11 @@ export class LauncherComponent extends EntityComponentBase {
     this.loadState(state);
   }
 
-  launch(head: THREE.Group, ownerTag: GameplayTag = this.ownerTag): Entity | undefined {
+  setLaunchForce(force: number) {
+    this.launchForce = force;
+  }
+
+  launch(head: THREE.Group, ownerTag: GameplayTag = this.ownerTag, entityState: EntityState, onKill?: (projectile: Entity) => void): Entity | undefined {
     if (!this.canLaunch) return undefined;
     const scene = this.getThreeScene();
     // scene.log(
@@ -49,40 +53,10 @@ export class LauncherComponent extends EntityComponentBase {
       (Math.random() - 0.5) * 0.025
     );
     cameraDir.add(spread).normalize();
-
     cameraPos.add(cameraDir);
-
-    const boxData: EntityState | any = {
-      name: "projectile",
-      entityType: this.projectile,
-      gameplayTags: [GameplayTags.Projectile, ownerTag],
-      userData: {
-        radius: 0.3,
-        segments: 16,
-        material: {
-          color: 0xffff00,
-          metalness: 0.25,
-          roughness: 0.5,
-          emissive: 0xffaa88,
-          emissiveIntensity: 8,
-        },
-        physicsData: {
-          mass: 100,
-          friction: 1,
-          density: 1,
-          restitution: 0.01,
-        },
-        transform: {
-          position: cameraPos,
-          rotation: new THREE.Euler(0, 0, 0),
-          scale: new THREE.Vector3(1, 1, 1),
-        },
-      },
-    };
-
     const spawnedProjectile = createEntity(
       this.getThreeScene(),
-      boxData,
+      entityState,
     );
     scene.addEntity(spawnedProjectile, true);
     if (spawnedProjectile) {
@@ -92,20 +66,19 @@ export class LauncherComponent extends EntityComponentBase {
       const projectileBody = spawnedProjectile.getPhysicsBodyData().body as RigidBody;
       projectileBody.enableCcd(true);
     }
-
     this.canLaunch = false;
     this.lastLaunchTime = Date.now();
-
     setTimeout(() => {
+      if (onKill) onKill(spawnedProjectile);
       spawnedProjectile?.kill();
-    }, this.timeAlive);
-
+    }, entityState.userData.timeAlive ?? this.timeAlive);
     return spawnedProjectile;
   }
 
-  launchOnce(head: THREE.Group, ownerTag: GameplayTag = this.ownerTag): void {
-    this.launch(head, ownerTag);
+  launchOnce(head: THREE.Group, ownerTag: GameplayTag = this.ownerTag, entityState: EntityState, onKill?: (projectile: Entity) => void): Entity | undefined {
+    const projectile = this.launch(head, ownerTag, entityState, onKill);
     this.removeFromEntity();
+    return projectile;
   }
 
   onUpdate(args: UpdateArgs): void {

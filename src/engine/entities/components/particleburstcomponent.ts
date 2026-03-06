@@ -68,6 +68,7 @@ export class ParticleBurstComponent extends EntityComponentBase {
     this.speed = state.speed || 10
     this.baseOpacity = state.opacity || 1
     this.lifetime = state.lifetime || 500
+    this.gravity = new THREE.Vector3(0, state.gravityY || 3, 0);
 
     for (let i = 0; i < this.amount; i++) {
       const velocity = new THREE.Vector3(

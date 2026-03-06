@@ -95,6 +95,7 @@ export class ToolBar extends Phaser.GameObjects.Container {
         },
       },
       { label: "Deselect", action: () => editor.deselectObject() },
+      { label: "Inspect", action: () => editor.inspectSelected() },
     ];
     const width = window.innerWidth / buttonData.length;
     let currentX = 0;

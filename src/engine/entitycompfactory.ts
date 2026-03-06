@@ -17,6 +17,8 @@ import { HealthComponent } from './entities/components/healthcomponent';
 import { ParticleBurstComponent } from './entities/components/particleburstcomponent';
 import { ConvergenceBurstComponent } from './entities/components/convergenceburst';
 import { AnimatedSpriteComponent } from './entities/components/animatedspritecomponent';
+import { SensorComponent } from './entities/components/sensorcomponent';
+import { MeshComponent } from './entities/components/meshcomponent';
 
 /** EntityComponentTypeMap defines a mapping from component type strings to their corresponding component classes */
 interface EntityComponentTypeMap {
@@ -43,7 +45,9 @@ const entityComponentTypeMap: EntityComponentTypeMap = {
   SpawnerComp: SpawnerComponent,
   HealthComp: HealthComponent,
   ParticleBurst: ParticleBurstComponent,
-  ConvergenceBurst: ConvergenceBurstComponent
+  ConvergenceBurst: ConvergenceBurstComponent,
+  SensorComp: SensorComponent,
+  MeshComp: MeshComponent,
 };
 
 export type ComponentType = keyof typeof entityComponentTypeMap;

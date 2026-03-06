@@ -9,6 +9,7 @@ import {
   Transform,
   UpdateArgs,
   UserData,
+  XYZ,
 } from "./shared.js";
 import { ThreeSceneBase } from "./threescenebase.js";
 import { createComponentsFromStates } from "./entitycompfactory.js";
@@ -91,7 +92,9 @@ export abstract class EntityBase implements Entity {
     this.object3D.position.copy(transform.position);
     this.object3D.quaternion.copy(transform.quaternion);
     this.rotation.copy(transform.rotation);
+    this.object3D.quaternion.setFromEuler(this.rotation);
     this.object3D.scale.copy(transform.scale);
+    this.object3D.updateMatrixWorld(true);
   }
 
   setPhysicsBodyData(physicsBodyData?: PhysicsBodyData): void {
@@ -102,6 +105,21 @@ export abstract class EntityBase implements Entity {
       return;
     }
     this.userData.physics = physicsBodyData;
+  }
+
+  setWorldPosition(position: XYZ): void {
+    this.object3D.position.set(position.x, position.y, position.z);
+    this.object3D.updateMatrixWorld(true);
+  }
+
+  setRotation(x: number, y: number, z: number): void {
+    this.rotation.set(x, y, z);
+    this.object3D.quaternion.setFromEuler(this.rotation);
+    this.object3D.updateMatrixWorld(true);
+  }
+
+  setVisible(visible: boolean): void {
+    this.object3D.visible = visible;
   }
 
   // Getters

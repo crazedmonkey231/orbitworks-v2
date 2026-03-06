@@ -44,7 +44,7 @@ export class WeatherManager {
     this.hemisphericLight = new THREE.HemisphereLight(0xffffff, 0.5);
     this.hemisphericLight.position.set(0, 25, 0);
 
-    this.fog = new THREE.FogExp2(0x777777, 0.0025);
+    this.fog = new THREE.FogExp2(0xffffff, 0.0025);
     
     this.threeScene.add(this.sky);
     this.threeScene.add(this.directionalLight);

@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import { GameplayTags, PhysicsData, XY } from '../shared';
 import { Editor } from './editor';
 import { getDefaultFontStyle, EditableProperty, createEditableProperty, getDefaultBackground } from './editorutils';
+import { roundQuaternion, roundToDecimals, roundXYZ } from '../utils';
 
 interface PropertiesPanelConfig {
   onChange?: () => void;
@@ -137,9 +138,9 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
             .split(",")
             .map((coord: string) => parseFloat(coord.trim()));
           if (pos.length === 3) {
-            selected.state.userData.width = pos[0];
-            selected.state.userData.height = pos[1];
-            selected.state.userData.depth = pos[2];
+            selected.state.userData.width = roundToDecimals(pos[0]);
+            selected.state.userData.height = roundToDecimals(pos[1]);
+            selected.state.userData.depth = roundToDecimals(pos[2]);
           }
         },
       },
@@ -153,8 +154,8 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
             .split(",")
             .map((coord: string) => parseFloat(coord.trim()));
           if (pos.length === 2) {
-            selected.state.userData.radius = pos[0];
-            selected.state.userData.segments = pos[1];
+            selected.state.userData.radius = roundToDecimals(pos[0]);
+            selected.state.userData.segments = roundToDecimals(pos[1]);
           }
         },
       },
@@ -171,7 +172,7 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
             .map((coord: string) => parseFloat(coord.trim()));
           if (pos.length === 3) {
             selected.state.userData.transform!.position =
-              new THREE.Vector3(pos[0], pos[1], pos[2]);
+              roundXYZ(pos[0], pos[1], pos[2]);
           }
         },
       },
@@ -191,9 +192,11 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
               THREE.MathUtils.degToRad(parseFloat(angle.trim())),
             );
           if (rot.length === 3) {
-            selected.state.userData.transform!.quaternion = new THREE.Quaternion().setFromEuler(
+            let quaternion = new THREE.Quaternion().setFromEuler(
               new THREE.Euler(rot[0], rot[1], rot[2]),
             );
+            quaternion = roundQuaternion(quaternion);
+            selected.state.userData.transform!.quaternion = quaternion
           }
         },
       },
@@ -209,11 +212,13 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
             .split(",")
             .map((factor: string) => parseFloat(factor.trim()));
           if (scale.length === 3) {
-            selected.state.userData.transform!.scale = new THREE.Vector3(
+            let newScale = new THREE.Vector3(
               scale[0],
               scale[1],
               scale[2],
             );
+            newScale = roundXYZ(newScale.x, newScale.y, newScale.z);
+            selected.state.userData.transform!.scale = newScale;
           }
         },
       },
@@ -229,7 +234,7 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
                 mass: mass,
               } as PhysicsData;
             } else {
-              selected.state.userData.physicsData!.mass = mass;
+              selected.state.userData.physicsData!.mass = roundToDecimals(mass);
             }
           }
         },
@@ -246,7 +251,7 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
                 friction: friction,
               } as PhysicsData;
             } else {
-              selected.state.userData.physicsData!.friction = friction;
+              selected.state.userData.physicsData!.friction = roundToDecimals(friction);
             }
           }
         },
@@ -263,7 +268,7 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
                 density: density,
               } as PhysicsData;
             } else {
-              selected.state.userData.physicsData!.density = density;
+              selected.state.userData.physicsData!.density = roundToDecimals(density);
             }
           }
         },
@@ -281,8 +286,7 @@ export class PropertiesPanel extends Phaser.GameObjects.Container {
                 restitution: restitution,
               } as PhysicsData;
             } else {
-              selected.state.userData.physicsData!.restitution =
-                restitution;
+              selected.state.userData.physicsData!.restitution = roundToDecimals(restitution);
             }
           }
         },

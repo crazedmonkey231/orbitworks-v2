@@ -8,6 +8,7 @@ import {
   MaterialData,
   UpdateArgs,
   EntityState,
+  XYZ,
 } from "./shared";
 import { PhysicsBodyData } from "./physics";
 import { ThreeSceneBase } from "./threescenebase";
@@ -27,6 +28,9 @@ export interface Entity {
   setName(name: string): void;
   setTransform(transform: Transform): void;
   setPhysicsBodyData(physicsBodyData?: PhysicsBodyData): void;
+  setWorldPosition(position: XYZ): void;
+  setRotation(x: number, y: number, z: number): void;
+  setVisible(visible: boolean): void;
 
   // Getters
   getThreeScene(): ThreeSceneBase;
