@@ -2,11 +2,10 @@ import Phaser from "phaser";
 import { Editor } from "./editor";
 import {
   getDefaultFontStyle,
-  createEditableProperty,
-  EditableProperty,
   getDefaultBackground,
 } from "./editorutils";
 import { XY } from "../shared";
+import { createEditableProperty, EditableProperty } from "./editableproperty";
 
 export interface ScenePropertiesConfig {
   onChange: () => void;
@@ -28,8 +27,8 @@ class ScenePropertiesButton extends Phaser.GameObjects.Container {
     this.action = action;
     this.bgd = getDefaultBackground(scene, size);
     this.bgd.setInteractive({ useHandCursor: true });
-    this.bgd.on("pointerover", () => this.bgd.setFillStyle(0x777777));
-    this.bgd.on("pointerout", () => this.bgd.setFillStyle(0x555555));
+    this.bgd.on("pointerover", () => this.bgd.setFillStyle(0xffffff, 0.25));
+    this.bgd.on("pointerout", () => this.bgd.setFillStyle(0x000000, 0.25));
     this.bgd.on("pointerdown", () => this.action());
     this.add(this.bgd);
     const centerX = size.x / 2;

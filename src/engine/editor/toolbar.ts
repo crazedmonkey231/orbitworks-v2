@@ -1,12 +1,7 @@
 import Phaser from "phaser";
 import { Editor } from "./editor";
-import { getDefaultFontStyle, createEditableProperty } from "./editorutils";
+import { getDefaultFontStyle, getDefaultBackground } from "./editorutils";
 import { XY } from "../shared";
-
-interface ToolBarConfig {
-  onChange?: (propertyName: string, newValue: any) => void;
-  onEnter?: (propertyName: string) => void;
-}
 
 class ToolBarButton extends Phaser.GameObjects.Container {
   private text: Phaser.GameObjects.Text;
@@ -22,16 +17,11 @@ class ToolBarButton extends Phaser.GameObjects.Container {
     super(scene, position.x, position.y);
     this.action = action;
 
-    this.bgd = scene.add.rectangle(0, 0, size.x, size.y, 0x555555);
+    this.bgd = getDefaultBackground(scene, size);
     this.bgd.setOrigin(0, 0);
-    this.bgd.setStrokeStyle(2, 0x222222);
-    this.bgd.setData(
-      "bounds",
-      new Phaser.Geom.Rectangle(this.x, this.y, size.x, size.y),
-    );
     this.bgd.setInteractive({ useHandCursor: true });
-    this.bgd.on("pointerover", () => this.bgd.setFillStyle(0x777777));
-    this.bgd.on("pointerout", () => this.bgd.setFillStyle(0x555555));
+    this.bgd.on("pointerover", () => this.bgd.setFillStyle(0xffffff, 0.25));
+    this.bgd.on("pointerout", () => this.bgd.setFillStyle(0x000000, 0.25));
     this.bgd.on("pointerdown", () => this.action());
     this.add(this.bgd);
 
@@ -45,42 +35,16 @@ class ToolBarButton extends Phaser.GameObjects.Container {
 
     this.add(this.text);
     this.setSize(size.x, size.y);
-    this.setData("bounds", this.getBounds());
   }
 }
 
 export class ToolBar extends Phaser.GameObjects.Container {
-  private editor: Editor;
-  private config: ToolBarConfig;
   constructor(
     editor: Editor,
     x: number,
-    y: number,
-    config: ToolBarConfig = {},
+    y: number
   ) {
     super(editor.getPhaserScene(), x, y);
-    this.config = config;
-    this.editor = editor;
-    this.create();
-  }
-
-  getBounds(): Phaser.Geom.Rectangle {
-    // Override to provide bounds for the container based on its children
-    const childrenBounds = this.getAll()
-      .map((child) => child.getData("bounds") as Phaser.Geom.Rectangle)
-      .filter((b) => b !== undefined);
-    if (childrenBounds.length === 0) {
-      return new Phaser.Geom.Rectangle(this.x, this.y, 0, 0);
-    }
-    const minX = Math.min(...childrenBounds.map((b) => b.x));
-    const minY = Math.min(...childrenBounds.map((b) => b.y));
-    const maxX = Math.max(...childrenBounds.map((b) => b.x + b.width));
-    const maxY = Math.max(...childrenBounds.map((b) => b.y + b.height));
-    return new Phaser.Geom.Rectangle(minX, minY, maxX - minX, maxY - minY);
-  }
-
-  create(): void {
-    const editor = this.editor;
     const phaserScene = editor.getPhaserScene();
     const hudContainer = editor.getHudContainer();
     const buttonData = [
@@ -94,21 +58,34 @@ export class ToolBar extends Phaser.GameObjects.Container {
           editor.toggleEntityPicker();
         },
       },
+      {
+        label: "Entity Builder",
+        action: () => {
+          editor.toggleEntityBuilder();
+        },
+      },
       { label: "Deselect", action: () => editor.deselectObject() },
       { label: "Inspect", action: () => editor.inspectSelected() },
     ];
-    const width = window.innerWidth / buttonData.length;
+    // const width = window.innerWidth / buttonData.length;
+    const width = 150;
     let currentX = 0;
     buttonData.forEach((btn) => {
       const button = new ToolBarButton(
         phaserScene,
-        { x: currentX, y: 0 },
+        { x: currentX + 5, y: 5 },
         btn.label,
         { x: width, y: 30 },
         btn.action,
       );
       hudContainer.add(button);
-      currentX += width;
+      currentX += width + 5;
     });
+
+    this.setSize(currentX, 40);
+  }
+
+  getBounds(): Phaser.Geom.Rectangle {
+    return new Phaser.Geom.Rectangle(this.x, this.y, this.width, this.height);
   }
 }

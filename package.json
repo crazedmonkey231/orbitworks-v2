@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@dimforge/rapier3d": "^0.19.3",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/dom-speech-recognition": "^0.0.7",
     "howler": "^2.2.4",
     "phaser": "^3.90.0",

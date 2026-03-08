@@ -11,6 +11,7 @@ import { PropertiesPanel } from "./propertiespanel";
 import { ToolBar } from "./toolbar";
 import { getDefaultFontStyle } from "./editorutils";
 import { ScenePropertiesPanel } from "./sceneproperties";
+import { EntityBuilderPanel } from "./entitybuilder/entitybuilderpanel";
 
 export interface EntitySelection {
   entity: Entity;
@@ -27,7 +28,9 @@ export class Editor {
   private propertiesPanel?: PropertiesPanel;
   private toolBar?: ToolBar;
   private sceneProperties?: ScenePropertiesPanel;
+  private entityBuilder?: EntityBuilderPanel;
   private selected: EntitySelection | null = null;
+
   private sceneName: string = "default_scene";
   private stateQueue: ThreeSceneState[] = [];
   private transformControls: TransformControls;
@@ -35,6 +38,7 @@ export class Editor {
   private toggleGizmo: boolean = true;
   private toggleText: Phaser.GameObjects.Text | null = null;
   private raycaster: THREE.Raycaster = new THREE.Raycaster();
+  private dragging: boolean = false;
 
   constructor(phaserScene: Phaser.Scene, threeScene: ThreeSceneBase, sceneName?: string) {
     this.phaserScene = phaserScene;
@@ -90,11 +94,17 @@ export class Editor {
     this.sceneName = name;
   }
 
+  setSelectedStateValue(property: string, value: any): void {
+    if (this.selected) {
+      (this.selected.state as any)[property] = value;
+    }
+  }
+
   getMenuPosition(): XY {
-    const x = window.innerWidth - 290;
-    const y = 40;
+    const x = window.innerWidth - 285;
+    const y = 5;
     if (this.sceneProperties) {
-      return { x, y: this.sceneProperties.getBounds().bottom + 10 };
+      return { x, y: this.sceneProperties.getBounds().bottom + 5 };
     }
     return { x, y };
   }
@@ -137,10 +147,8 @@ export class Editor {
     this.phaserScene.input.on(
       "pointerdown",
       (pointer: Phaser.Input.Pointer) => {
-        if (pointer.rightButtonDown()) {
-          return;
-        }
-        if (this.isInMenu(pointer)) {
+        const inMenu = this.isInMenu(pointer);
+        if (inMenu || pointer.rightButtonDown()) {
           return;
         }
         this.raycastScreenPosition({ x: pointer.x, y: pointer.y });
@@ -148,14 +156,20 @@ export class Editor {
     );
 
     this.phaserScene.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-      if (this.isInMenu(pointer)) {
+      const inMenu = this.isInMenu(pointer);
+      if (inMenu || pointer.rightButtonDown()) {
         return;
       }
-      // this.queueSceneStateChange();
+    });
+
+    this.phaserScene.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+      const inMenu = this.isInMenu(pointer);
+      (this.threeScene as any).orbitControls.enabled = !inMenu && !this.dragging;
     });
 
     this.transformControls.addEventListener("dragging-changed", (event) => {
       (this.threeScene as any).orbitControls.enabled = !event.value;
+      this.dragging = event.value as boolean;
       if (event.value) {
         this.threeScene.togglePhysics(false);
         this.refreshInfoText();
@@ -288,7 +302,8 @@ export class Editor {
       (this.toolBar &&
         this.toolBar.getBounds().contains(pointer.x, pointer.y)) ||
       (this.sceneProperties &&
-        this.sceneProperties.getBounds().contains(pointer.x, pointer.y));
+        this.sceneProperties.getBounds().contains(pointer.x, pointer.y)) ||
+      this.entityBuilder !== undefined;
     return inMenu || false;
   }
 
@@ -366,7 +381,7 @@ export class Editor {
     });
   }
 
-  reloadScene(popCached: boolean = false): void {
+  reloadScene(popCached: boolean = false, keepSelected: boolean = false): void {
     let currentState: ThreeSceneState | null = null;
     if (popCached) {
       if (this.stateQueue.length > 1) {
@@ -376,12 +391,13 @@ export class Editor {
       currentState = this.stateQueue[this.stateQueue.length - 1];
     }
     if (currentState) {
-      this.deselectObject();
+      if (keepSelected && this.selected) {
+        this.deselectObject();
+      }
       this.togglePhysics(false);
       this.removeScenePropertiesPanel();
       this.threeScene.loadSceneState(currentState);
       this.refreshInfoText();
-      this.refreshScenePropertiesPanel(this.getMenuPosition());
     }
   }
 
@@ -452,8 +468,6 @@ export class Editor {
         this.queueSceneStateChange();
       },
       onEnter: () => {
-        this.queueSceneStateChange();
-        this.reloadScene(true);
         this.queueSceneStateChange();
       },
     });
@@ -545,5 +559,24 @@ export class Editor {
       },
     };
     createAddEntities(this.threeScene, [boxData]);
+  }
+
+  removeEntityBuilder(): void {
+    if (this.entityBuilder) {
+      this.entityBuilder.destroy();
+      this.entityBuilder = undefined;
+    }
+  }
+
+  toggleEntityBuilder(): void {
+    if (this.entityBuilder || !this.selected) {
+      return;
+    }
+    this.clearGizmo();
+    this.removeScenePropertiesPanel();
+    this.removeEntityPropertiesPanel();
+    const builder = new EntityBuilderPanel(this, 50, 50);
+    this.entityBuilder = builder;
+    this.hudContainer.add(builder);
   }
 }

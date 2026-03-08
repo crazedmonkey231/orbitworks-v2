@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 import { DemoPhaserScene } from "./engine/scenes/phaser/demophaserscene";
 import { test } from "./engine/sandbox/test"
+// import { AiDemoPhaserScene } from "./engine/scenes/phaser/aidemophaserscene";
 
 /** Initialize Phaser game with 3D scene */
 const phaserGame = new Phaser.Game({
@@ -38,6 +39,7 @@ phaserGame.scale.on("resize", () => {
 
 function sandboxTest() {
   test();
+  // testGeneration();
 }
 
 sandboxTest();
